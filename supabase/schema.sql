@@ -23,7 +23,7 @@ as $$
     from auth.users u
     where u.id = auth.uid()
       and lower(u.email) = any (array[
-        'saramo55sara@gmail.com'   -- 👈 CHANGE THIS to your real admin email
+        'admin@saradolls.com'   -- 👈 CHANGE THIS to your real admin email
       ])
   );
 $$;

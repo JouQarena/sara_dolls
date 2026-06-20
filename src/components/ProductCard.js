@@ -11,12 +11,18 @@ export default function ProductCard({ product }) {
     price,
     original_price,
     image_url,
+    images_gallery,
     average_rating,
     review_count,
     stock,
     product_type,
     is_featured,
   } = product;
+
+  // Second image for the hover-fade effect (first gallery image that differs).
+  const secondImage = (images_gallery || []).find(
+    (u) => u && u !== image_url
+  );
 
   const isPattern = product_type === "pattern_pdf";
   const outOfStock = !isPattern && stock <= 0;
@@ -36,8 +42,21 @@ export default function ProductCard({ product }) {
           alt={name_ar}
           fill
           sizes="(max-width:768px) 50vw, 25vw"
-          className="object-cover group-hover:scale-105 transition duration-500"
+          className={`object-cover transition duration-500 group-hover:scale-105 ${
+            secondImage ? "group-hover:opacity-0" : ""
+          }`}
         />
+        {/* second image fades in on hover (desktop) */}
+        {secondImage && (
+          <Image
+            src={secondImage}
+            alt={`${name_ar} - صورة إضافية`}
+            fill
+            sizes="(max-width:768px) 50vw, 25vw"
+            loading="lazy"
+            className="object-cover opacity-0 scale-105 transition duration-500 group-hover:opacity-100"
+          />
+        )}
 
         {/* badges */}
         <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5">

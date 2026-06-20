@@ -1,15 +1,25 @@
-node_modules/
-.next/
-out/
-build/
-.env
-.env.local
-.env.*.local
-*.log
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-Thumbs.db
-.vscode/
-.idea/
+*.pem
+
+# debug
+npm-debug.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
 .vercel
-*.tsbuildinfo
-next-env.d.ts

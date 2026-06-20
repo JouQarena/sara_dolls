@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Plus, Pencil, Trash2, X, FileText } from "lucide-react";
 import { saveProduct, deleteProduct } from "../actions";
+import ImageUploader from "@/components/admin/ImageUploader";
 import { Badge } from "@/components/admin/ui";
 import { formatEGP } from "@/lib/constants";
 
@@ -76,19 +77,42 @@ function DeleteButton({ id }) {
   );
 }
 
+function buildInitialImages(product) {
+  const list = [];
+  if (product.image_url) list.push({ url: product.image_url, isMain: true });
+  (product.images_gallery || []).forEach((url) => {
+    if (url && url !== product.image_url) list.push({ url, isMain: false });
+  });
+  return list;
+}
+
 function ProductModal({ product, categories, onClose }) {
   const isNew = !product.id;
   const [type, setType] = useState(product.product_type || "physical");
+  const [images, setImages] = useState(() => buildInitialImages(product));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   async function onSubmit(e) {
     e.preventDefault();
-    setSaving(true);
     setError("");
+
+    // Validate images.
+    if (images.length === 0) {
+      setError("من فضلك أضيفي صورة رئيسية للمنتج على الأقل.");
+      return;
+    }
+
+    setSaving(true);
     const fd = new FormData(e.currentTarget);
     if (product.id) fd.set("id", product.id);
-    if (product.image_url) fd.set("existing_image_url", product.image_url);
+
+    // Main = the flagged one (or first); rest = gallery.
+    const main = images.find((x) => x.isMain) || images[0];
+    const gallery = images.filter((x) => x.url !== main.url).map((x) => x.url);
+    fd.set("image_url", main.url);
+    fd.set("images_gallery_json", JSON.stringify(gallery));
+
     if (product.pdf_url) fd.set("existing_pdf_url", product.pdf_url);
     const res = await saveProduct(fd);
     setSaving(false);
@@ -128,7 +152,17 @@ function ProductModal({ product, categories, onClose }) {
             <option value="pattern_pdf">باترون رقمي (PDF)</option>
           </Sel>
 
-          <FileInp label="صورة المنتج" name="image" accept="image/*" current={product.image_url} />
+          <div>
+            <span className="block text-sm font-extrabold text-warm-mocha mb-1.5">
+              صور المنتج (1 رئيسية + حتى 5 إضافية)
+            </span>
+            <ImageUploader
+              value={images}
+              onChange={setImages}
+              productId={product.id || "new"}
+            />
+          </div>
+
           {type === "pattern_pdf" && (
             <FileInp label="ملف الباترون (PDF)" name="pdf" accept="application/pdf" current={product.pdf_url} pdf />
           )}

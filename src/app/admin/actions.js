@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { admin, adminConfigured, requireAdmin } from "@/lib/admin";
 import { STORAGE_BUCKETS } from "@/lib/constants";
+import { deleteProductImages } from "@/lib/deleteImage";
 
 function slugify(str) {
   return String(str || "")
@@ -72,18 +73,14 @@ export async function saveProduct(formData) {
   if (!adminConfigured()) return { success: true, demo: true };
   const sb = admin();
 
-  // Upload main image if provided.
-  let image_url = String(formData.get("existing_image_url") || "") || null;
-  const imageFile = formData.get("image");
-  if (imageFile && typeof imageFile === "object" && imageFile.size > 0) {
-    const ext = (imageFile.name?.split(".").pop() || "jpg").toLowerCase();
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error: upErr } = await sb.storage
-      .from(STORAGE_BUCKETS.PRODUCTS)
-      .upload(path, imageFile, { contentType: imageFile.type });
-    if (!upErr) {
-      image_url = sb.storage.from(STORAGE_BUCKETS.PRODUCTS).getPublicUrl(path).data.publicUrl;
-    }
+  // Images are uploaded client-side (ImageUploader) and sent as URLs.
+  const image_url = String(formData.get("image_url") || "") || null;
+  let images_gallery = [];
+  try {
+    images_gallery = JSON.parse(String(formData.get("images_gallery_json") || "[]"));
+    if (!Array.isArray(images_gallery)) images_gallery = [];
+  } catch {
+    images_gallery = [];
   }
 
   // Upload PDF for patterns.
@@ -101,7 +98,8 @@ export async function saveProduct(formData) {
 
   const payload = {
     name, name_ar, description_ar, price, original_price, stock,
-    category_id, product_type, pdf_url, image_url, is_featured, is_available,
+    category_id, product_type, pdf_url, image_url, images_gallery,
+    is_featured, is_available,
   };
 
   let error;
@@ -120,9 +118,25 @@ export async function deleteProduct(formData) {
   const id = String(formData.get("id"));
   if (!adminConfigured()) return { success: true, demo: true };
   const sb = admin();
+
+  // Fetch image URLs first so we can clean up storage after delete.
+  const { data: prod } = await sb
+    .from("products")
+    .select("image_url, images_gallery")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await sb.from("products").delete().eq("id", id);
+  if (error) return { error: "تعذّر الحذف." };
+
+  // Best-effort: remove all images (main + gallery) from storage.
+  if (prod) {
+    const urls = [prod.image_url, ...(prod.images_gallery || [])].filter(Boolean);
+    await deleteProductImages(sb, urls);
+  }
+
   revalidatePath("/admin/products");
-  return error ? { error: "تعذّر الحذف." } : { success: true };
+  return { success: true };
 }
 
 // ---------- CATEGORIES ----------

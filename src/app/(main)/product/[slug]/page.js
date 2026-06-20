@@ -7,7 +7,7 @@ import {
   getCategoryBySlug,
 } from "@/lib/products";
 import { formatEGP } from "@/lib/constants";
-import ProductGallery from "@/components/ProductGallery";
+import ImageGallery from "@/components/product/ImageGallery";
 import AddToCartBox from "@/components/AddToCartBox";
 import ProductCard from "@/components/ProductCard";
 import StarRating from "@/components/StarRating";
@@ -99,9 +99,14 @@ export default async function ProductDetailPage({ params }) {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-          {/* gallery */}
-          <ProductGallery
-            images={product.images_gallery?.length ? product.images_gallery : [product.image_url]}
+          {/* gallery: main image first, then unique gallery images */}
+          <ImageGallery
+            images={[
+              product.image_url,
+              ...(product.images_gallery || []).filter(
+                (u) => u && u !== product.image_url
+              ),
+            ].filter(Boolean)}
             alt={product.name_ar}
             isPattern={isPattern}
             discountPct={discountPct}
