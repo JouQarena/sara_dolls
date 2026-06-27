@@ -14,6 +14,12 @@ const ARABIC_ROUTES = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Allow larger Server Action payloads (Instapay screenshot uploads can be a few MB).
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "8mb",
+    },
+  },
   images: {
     remotePatterns: [
       {

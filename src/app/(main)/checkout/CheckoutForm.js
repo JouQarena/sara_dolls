@@ -100,8 +100,9 @@ export default function CheckoutForm() {
         toast("تم تأكيد طلبك بنجاح! 🎉");
         router.push(`/order-confirmation/${res.id}`);
       }
-    } catch {
-      setError("حدث خطأ غير متوقع، حاولي مرة أخرى.");
+    } catch (err) {
+      // TEMP DEBUG: show the real thrown error.
+      setError("خطأ غير متوقع: " + (err?.message || String(err)));
       setSubmitting(false);
     }
   }
