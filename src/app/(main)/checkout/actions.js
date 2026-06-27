@@ -224,7 +224,7 @@ export async function placeOrder(formData) {
       .select("id, order_number")
       .single();
 
-    if (orderErr) return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
+    if (orderErr) return { error: "تعذّر حفظ الطلب: " + orderErr.message };
 
     // Insert order items
     const { error: itemsErr } = await supabase.from("order_items").insert(
@@ -236,7 +236,7 @@ export async function placeOrder(formData) {
         price_at_purchase: li.price_at_purchase,
       }))
     );
-    if (itemsErr) return { error: "تعذّر حفظ تفاصيل الطلب." };
+    if (itemsErr) return { error: "تعذّر حفظ تفاصيل الطلب: " + itemsErr.message };
 
     // Reduce stock (physical only)
     for (const li of lineItems) {
@@ -261,7 +261,8 @@ export async function placeOrder(formData) {
       orderNumber: order.order_number,
       total,
     };
-  } catch {
-    return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
+  } catch (e) {
+    // TEMP DEBUG: surface the real error so we can diagnose checkout issues.
+    return { error: "خطأ: " + (e?.message || String(e)) };
   }
 }

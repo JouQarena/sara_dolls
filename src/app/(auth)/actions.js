@@ -13,11 +13,16 @@ import {
 } from "@/lib/validation";
 
 function getSiteOrigin() {
+  // Prefer the explicitly configured site URL in production.
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (envUrl && !envUrl.includes("localhost")) {
+    return envUrl.replace(/\/$/, "");
+  }
   const h = headers();
   const host = h.get("x-forwarded-host") || h.get("host");
   const proto = h.get("x-forwarded-proto") || "http";
   if (host) return `${proto}://${host}`;
-  return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  return envUrl || "http://localhost:3000";
 }
 
 // ---- LOGIN ----

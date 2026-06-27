@@ -37,6 +37,17 @@ export async function updateSession(request) {
     }
   );
 
+  // If a Supabase auth link lands on any page with ?code=... (e.g. the root "/"),
+  // forward it to the dedicated callback route that exchanges it for a session.
+  const codeParam = request.nextUrl.searchParams.get("code");
+  if (codeParam && request.nextUrl.pathname !== "/auth/callback") {
+    const url = request.nextUrl.clone();
+    const next = request.nextUrl.searchParams.get("next") || "/";
+    url.pathname = "/auth/callback";
+    url.search = `?code=${codeParam}&next=${encodeURIComponent(next)}`;
+    return NextResponse.redirect(url);
+  }
+
   // IMPORTANT: refresh the session so it doesn't expire.
   const {
     data: { user },
