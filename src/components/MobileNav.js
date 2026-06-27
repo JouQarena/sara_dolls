@@ -24,7 +24,10 @@ export default function MobileNav({ links, isLoggedIn, isAdmin }) {
             className="absolute inset-0 bg-warm-mocha/40 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute top-0 right-0 h-full w-72 max-w-[85%] bg-cream shadow-2xl p-5 flex flex-col animate-fade-in">
+          <div
+            style={{ backgroundColor: "#FFF8F5" }}
+            className="absolute top-0 right-0 h-full w-72 max-w-[85%] shadow-2xl p-5 flex flex-col overflow-y-auto"
+          >
             <div className="flex items-center justify-between mb-6">
               <span className="font-black text-lg text-warm-mocha">القائمة</span>
               <button

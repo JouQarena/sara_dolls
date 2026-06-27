@@ -130,6 +130,11 @@ export async function placeOrder(formData) {
     const supabase = createClient();
     const user = await getCurrentUser();
 
+    // Require login to place an order (defense in depth; middleware also guards /checkout).
+    if (!user) {
+      return { error: "يجب تسجيل الدخول لإتمام الطلب." };
+    }
+
     // Re-fetch product prices/stock server-side (never trust the client).
     const ids = items.map((i) => i.id);
     const { data: products, error: prodErr } = await supabase

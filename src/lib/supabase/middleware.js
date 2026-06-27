@@ -45,7 +45,7 @@ export async function updateSession(request) {
   const path = request.nextUrl.pathname;
 
   // Routes that require authentication.
-  const PROTECTED = ["/my-orders", "/profile", "/wishlist"];
+  const PROTECTED = ["/my-orders", "/profile", "/wishlist", "/checkout"];
   const isProtected = PROTECTED.some(
     (p) => path === p || path.startsWith(p + "/")
   );
