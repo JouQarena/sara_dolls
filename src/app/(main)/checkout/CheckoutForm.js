@@ -60,6 +60,14 @@ export default function CheckoutForm() {
     formData.set("cart_json", JSON.stringify(cart));
     if (discount?.code) formData.set("discount_code", discount.code);
 
+    // Capture the fields we need NOW (e.currentTarget becomes null after await).
+    const orderInfo = {
+      full_name: formData.get("full_name"),
+      phone_number: formData.get("phone_number"),
+      governorate: formData.get("governorate"),
+      address: formData.get("address"),
+    };
+
     try {
       const res = await placeOrder(formData);
       if (res?.error) {
@@ -69,16 +77,15 @@ export default function CheckoutForm() {
       }
       if (res?.success) {
         // Build WhatsApp message for confirmation page.
-        const fd = new FormData(e.currentTarget);
         const items = cart.map(
           (i) => `• ${i.name_ar} × ${i.quantity} = ${i.price * i.quantity} ج.م`
         );
         const msg = regularOrderWhatsappMessage({
           orderNumber: res.orderNumber,
-          fullName: fd.get("full_name"),
-          phone: fd.get("phone_number"),
-          governorate: fd.get("governorate"),
-          address: fd.get("address"),
+          fullName: orderInfo.full_name,
+          phone: orderInfo.phone_number,
+          governorate: orderInfo.governorate,
+          address: orderInfo.address,
           items,
           total: res.total,
           paymentMethod:
@@ -100,9 +107,8 @@ export default function CheckoutForm() {
         toast("تم تأكيد طلبك بنجاح! 🎉");
         router.push(`/order-confirmation/${res.id}`);
       }
-    } catch (err) {
-      // TEMP DEBUG: show the real thrown error.
-      setError("خطأ غير متوقع: " + (err?.message || String(err)));
+    } catch {
+      setError("حدث خطأ غير متوقع، حاولي مرة أخرى.");
       setSubmitting(false);
     }
   }

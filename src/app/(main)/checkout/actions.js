@@ -225,7 +225,7 @@ export async function placeOrder(formData) {
       .select("id, order_number")
       .single();
 
-    if (orderErr) return { error: "تعذّر حفظ الطلب: " + orderErr.message };
+    if (orderErr) return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
 
     // Insert order items
     const { error: itemsErr } = await supabase.from("order_items").insert(
@@ -237,7 +237,7 @@ export async function placeOrder(formData) {
         price_at_purchase: li.price_at_purchase,
       }))
     );
-    if (itemsErr) return { error: "تعذّر حفظ تفاصيل الطلب: " + itemsErr.message };
+    if (itemsErr) return { error: "تعذّر حفظ تفاصيل الطلب." };
 
     // Reduce stock (physical only)
     for (const li of lineItems) {
@@ -262,12 +262,11 @@ export async function placeOrder(formData) {
       orderNumber: order.order_number,
       total,
     };
-  } catch (e) {
-    // TEMP DEBUG: surface the real error so we can diagnose checkout issues.
-    return { error: "خطأ (داخلي): " + (e?.message || String(e)) };
+  } catch {
+    return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
   }
- } catch (outer) {
-   // Catches anything thrown before the inner try (e.g. settings/auth).
-   return { error: "خطأ (عام): " + (outer?.message || String(outer)) };
+ } catch {
+   // Safety net: catches anything thrown before the inner try.
+   return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
  }
 }
