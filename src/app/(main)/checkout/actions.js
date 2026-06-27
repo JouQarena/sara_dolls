@@ -76,6 +76,7 @@ export async function validateDiscount(code, subtotal) {
 
 // ---- Place a regular order ----
 export async function placeOrder(formData) {
+ try {
   // Parse cart (sent as JSON string from the client).
   let items;
   try {
@@ -263,6 +264,10 @@ export async function placeOrder(formData) {
     };
   } catch (e) {
     // TEMP DEBUG: surface the real error so we can diagnose checkout issues.
-    return { error: "خطأ: " + (e?.message || String(e)) };
+    return { error: "خطأ (داخلي): " + (e?.message || String(e)) };
   }
+ } catch (outer) {
+   // Catches anything thrown before the inner try (e.g. settings/auth).
+   return { error: "خطأ (عام): " + (outer?.message || String(outer)) };
+ }
 }
