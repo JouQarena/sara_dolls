@@ -12,6 +12,7 @@ export default function MobileNav({ links, isLoggedIn, isAdmin }) {
 
   useEffect(() => setMounted(true), []);
 
+  // Lock body scroll while the drawer is open.
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -30,6 +31,7 @@ export default function MobileNav({ links, isLoggedIn, isAdmin }) {
         zIndex: 9999,
       }}
     >
+      {/* backdrop */}
       <div
         onClick={() => setOpen(false)}
         style={{
@@ -39,6 +41,7 @@ export default function MobileNav({ links, isLoggedIn, isAdmin }) {
         }}
       />
 
+      {/* drawer panel */}
       <div
         style={{
           position: "absolute",
@@ -138,6 +141,8 @@ export default function MobileNav({ links, isLoggedIn, isAdmin }) {
         <Menu className="w-6 h-6" />
       </button>
 
+      {/* Render the drawer into <body> via a portal so it escapes the
+          header's positioning/stacking context and covers the full screen. */}
       {open && mounted && createPortal(drawer, document.body)}
     </>
   );
