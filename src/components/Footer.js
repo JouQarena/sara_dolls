@@ -57,8 +57,22 @@ export default function Footer() {
           <FooterCol title="السياسات" links={POLICY_LINKS} />
         </div>
 
-        <div className="border-t border-cream/15 mt-10 pt-6 text-center text-sm text-cream/60 font-semibold">
-          © {new Date().getFullYear()} سارة دولز — جميع الحقوق محفوظة 🌸
+        <div className="border-t border-cream/15 mt-10 pt-6 text-center text-sm text-cream/60 font-semibold space-y-1.5">
+          <p>© {new Date().getFullYear()} سارة دولز — جميع الحقوق محفوظة 🌸</p>
+          <p>
+            تطوير وتصميم:{" "}
+            <span className="text-pastel-pink font-black">يوسف</span>{" "}
+            ·{" "}
+            <a
+              href="https://wa.me/201157514941"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pastel-pink hover:text-white transition"
+              dir="ltr"
+            >
+              01157514941
+            </a>
+          </p>
         </div>
       </div>
     </footer>
