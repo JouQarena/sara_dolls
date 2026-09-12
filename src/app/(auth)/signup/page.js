@@ -17,12 +17,20 @@ export default function SignupPage() {
           تحققي من بريدك
         </h2>
         <Alert type="success">{state.success}</Alert>
-        <Link
-          href="/login"
-          className="inline-block mt-6 bg-soft-rose text-white font-black px-6 py-3 rounded-2xl hover:bg-brand-dark transition"
-        >
-          الذهاب لتسجيل الدخول
-        </Link>
+        <div className="flex flex-wrap justify-center gap-3 mt-6">
+          <Link
+            href="/login"
+            className="inline-block bg-soft-rose text-white font-black px-6 py-3 rounded-2xl hover:bg-brand-dark transition"
+          >
+            الذهاب لتسجيل الدخول
+          </Link>
+          <Link
+            href="/shop"
+            className="inline-block bg-white border-2 border-pastel-pink text-warm-mocha font-black px-6 py-3 rounded-2xl hover:border-soft-rose transition"
+          >
+            اطلبي بدون حساب 🌸
+          </Link>
+        </div>
       </div>
     );
   }
@@ -30,9 +38,16 @@ export default function SignupPage() {
   return (
     <>
       <h2 className="text-2xl font-black text-warm-mocha mb-1">إنشاء حساب</h2>
-      <p className="text-warm-mocha/60 font-semibold text-sm mb-6">
+      <p className="text-warm-mocha/60 font-semibold text-sm mb-3">
         انضمي لعائلة سارة دولز 🧶
       </p>
+      <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha mb-6">
+        🌸 مش حابة تعملي حساب؟{" "}
+        <Link href="/shop" className="text-soft-rose underline underline-offset-2">
+          اطلبي مباشرة بدون تسجيل
+        </Link>{" "}
+        — لا حاجة لإيميل.
+      </div>
 
       <form action={formAction} className="space-y-4">
         {state?.error && <Alert type="error">{state.error}</Alert>}

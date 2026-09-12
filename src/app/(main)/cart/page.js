@@ -239,6 +239,9 @@ export default function CartPage() {
             >
               إتمام الطلب <ArrowLeft className="w-5 h-5" />
             </Link>
+            <p className="text-center text-xs font-bold text-warm-mocha/50 mt-2.5">
+              🌸 يمكنك الطلب بدون تسجيل الدخول — لا حاجة لحساب أو إيميل
+            </p>
           </div>
         </aside>
       </div>

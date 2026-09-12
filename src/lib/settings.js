@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 const DEFAULT_SETTINGS = {
   store_name: "Sara Dolls",
   store_name_ar: "سارة دولز",
-  whatsapp_number: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "",
+  whatsapp_number: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201109624671",
   instapay_number: process.env.NEXT_PUBLIC_INSTAPAY_NUMBER || "",
   flat_shipping_fee: 50,
   free_shipping_threshold: 1000,

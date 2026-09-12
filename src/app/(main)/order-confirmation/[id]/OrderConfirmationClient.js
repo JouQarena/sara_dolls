@@ -80,6 +80,10 @@ export default function OrderConfirmationClient({ id, orderNumber }) {
         </a>
       )}
 
+      <p className="text-xs font-bold text-warm-mocha/50 mb-4">
+        🌸 طلبتِ بدون حساب؟ احتفظي برقم الطلب وتابعي معنا عبر واتساب في أي وقت.
+      </p>
+
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/my-orders"

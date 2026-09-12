@@ -18,9 +18,15 @@ function LoginForm() {
   return (
     <>
       <h2 className="text-2xl font-black text-warm-mocha mb-1">تسجيل الدخول</h2>
-      <p className="text-warm-mocha/60 font-semibold text-sm mb-6">
+      <p className="text-warm-mocha/60 font-semibold text-sm mb-3">
         أهلاً بعودتك إلى سارة دولز 🌸
       </p>
+      <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha mb-6">
+        🌸 يمكنك الطلب بدون حساب —{" "}
+        <Link href="/shop" className="text-soft-rose underline underline-offset-2">
+          تصفّحي المتجر واطلبي مباشرة
+        </Link>
+      </div>
 
       {justReset && (
         <div className="mb-4">

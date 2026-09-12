@@ -1,4 +1,5 @@
-import { MessageCircle, Instagram, Facebook, Clock, MapPin } from "lucide-react";
+import { MessageCircle, Instagram, Facebook, Clock, MapPin, Phone } from "lucide-react";
+import { SARA_PHONE_LOCAL } from "@/lib/whatsapp";
 import { PageHeader } from "@/components/legal";
 import { whatsappLink } from "@/lib/whatsapp";
 import ContactForm from "./ContactForm";
@@ -41,6 +42,17 @@ export default function ContactPage() {
           </a>
 
           <div className="bg-white rounded-3xl p-6 border border-pastel-pink/40 shadow-soft-sm space-y-4">
+            <InfoRow icon={Phone} title="هاتف / واتساب سارة">
+              <a
+                href={wa}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-soft-rose hover:underline font-black"
+                dir="ltr"
+              >
+                {SARA_PHONE_LOCAL}
+              </a>
+            </InfoRow>
             <InfoRow icon={Clock} title="مواعيد العمل">
               يوميًا من 10 صباحًا حتى 10 مساءً
             </InfoRow>

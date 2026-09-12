@@ -78,12 +78,14 @@ export async function signupAction(prevState, formData) {
 
   if (error) return { error: translateAuthError(error.message) };
 
-  // If email confirmation is required, no session is returned.
+  // If email confirmation is still enabled in Supabase, no session is returned.
+  // (Store owner: turn OFF "Confirm email" in Supabase → Authentication → Providers → Email
+  // so customers can register and log in immediately with no email step.)
   const needsConfirmation = !data.session;
   if (needsConfirmation) {
     return {
       success:
-        "تم إنشاء حسابك! تحققي من بريدك الإلكتروني لتأكيد الحساب ثم سجّلي الدخول.",
+        "تم إنشاء حسابك! تحققي من بريدك الإلكتروني لتأكيد الحساب ثم سجّلي الدخول. ولو مش حابة تستني، يمكنك الطلب مباشرة بدون حساب من المتجر 🌸",
     };
   }
 

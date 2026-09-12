@@ -1,6 +1,11 @@
+// 🌸 Sara's store WhatsApp (international format, no +).
+// Used as a fallback so links keep working even if the env var is missing.
+export const SARA_WHATSAPP_INTL = "201109624671"; // 01109624671
+export const SARA_PHONE_LOCAL = "01109624671";
+
 // Build a wa.me link to the store admin with a prefilled message.
 export function whatsappLink(message, number) {
-  const num = (number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "")
+  const num = (number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || SARA_WHATSAPP_INTL)
     .toString()
     .replace(/[^\d]/g, "");
   const text = encodeURIComponent(message || "");
@@ -9,7 +14,7 @@ export function whatsappLink(message, number) {
 
 // Public (client-safe) WhatsApp number.
 export function adminWhatsappNumber() {
-  return (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "")
+  return (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || SARA_WHATSAPP_INTL)
     .toString()
     .replace(/[^\d]/g, "");
 }

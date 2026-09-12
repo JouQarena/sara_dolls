@@ -45,10 +45,20 @@ export default function Footer() {
             <p className="text-cream/70 text-sm font-semibold leading-relaxed">
               كل دمية حكاية مصنوعة بحب. كروشيه يدوي 100% من قلب مصر.
             </p>
-            <div className="flex gap-2 mt-4">
+            {/* Sara's store contact (NOT the developer number below) */}
+            <a
+              href="https://wa.me/201109624671"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-3 text-sm font-black text-pastel-pink hover:text-white transition"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span dir="ltr">01109624671</span>
+            </a>
+            <div className="flex gap-2 mt-3">
               <SocialIcon href="https://instagram.com" icon={Instagram} label="إنستجرام" />
               <SocialIcon href="https://facebook.com" icon={Facebook} label="فيسبوك" />
-              <SocialIcon href="https://wa.me" icon={MessageCircle} label="واتساب" />
+              <SocialIcon href="https://wa.me/201109624671" icon={MessageCircle} label="واتساب" />
             </div>
           </div>
 

@@ -128,6 +128,16 @@ export default function CheckoutForm() {
       <div className="lg:col-span-2 space-y-6">
         {error && <Alert type="error">{error}</Alert>}
 
+        {/* Guest checkout notice */}
+        <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha">
+          🌸 يمكنك إتمام الطلب <span className="font-black">بدون إنشاء حساب</span> — فقط املئي
+          بيانات التوصيل.{" "}
+          <Link href="/login?redirect=/checkout" className="text-soft-rose underline underline-offset-2">
+            عندك حساب؟ سجّلي الدخول
+          </Link>{" "}
+          لتتبّع طلباتك بسهولة.
+        </div>
+
         {/* shipping info */}
         <section className="bg-white rounded-3xl p-6 border border-pastel-pink/40">
           <h2 className="font-black text-warm-mocha text-lg mb-4">

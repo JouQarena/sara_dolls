@@ -129,12 +129,8 @@ export async function placeOrder(formData) {
 
   try {
     const supabase = createClient();
+    // Guest checkout is allowed — user may be null (order is linked when logged in).
     const user = await getCurrentUser();
-
-    // Require login to place an order (defense in depth; middleware also guards /checkout).
-    if (!user) {
-      return { error: "يجب تسجيل الدخول لإتمام الطلب." };
-    }
 
     // Re-fetch product prices/stock server-side (never trust the client).
     const ids = items.map((i) => i.id);

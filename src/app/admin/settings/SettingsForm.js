@@ -26,7 +26,7 @@ export default function SettingsForm({ settings }) {
       </Section>
 
       <Section title="التواصل والدفع">
-        <Inp label="رقم واتساب (دولي بدون +)" name="whatsapp_number" defaultValue={settings.whatsapp_number} dir="ltr" placeholder="201001234567" />
+        <Inp label="رقم واتساب سارة (دولي بدون +)" name="whatsapp_number" defaultValue={settings.whatsapp_number} dir="ltr" placeholder="201109624671" />
         <Inp label="رقم/حساب إنستاباي" name="instapay_number" defaultValue={settings.instapay_number} dir="ltr" />
       </Section>
 
