@@ -146,6 +146,7 @@ export async function submitCustomOrder(prevState, formData) {
       .single();
 
     if (error) {
+      console.error("[custom-order] insert failed:", error?.message);
       return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
     }
 
@@ -155,7 +156,8 @@ export async function submitCustomOrder(prevState, formData) {
       orderNumber: data.order_number,
       imagesCount: imageUrls.length,
     };
-  } catch {
+  } catch (err) {
+    console.error("[custom-order] unexpected:", err?.message || err);
     return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
   }
 }

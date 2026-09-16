@@ -11,6 +11,7 @@ import { Field, Alert } from "@/components/forms";
 import SubmitButton from "@/components/SubmitButton";
 import { ORDER_TYPES, SIZES, BUDGET_RANGES } from "@/lib/customOrders";
 import { EGYPT_GOVERNORATES } from "@/lib/constants";
+import { compressImageFile } from "@/lib/compressImage";
 import {
   customOrderWhatsappMessage,
   whatsappLink,
@@ -25,11 +26,31 @@ export default function CustomOrderForm() {
   const [previews, setPreviews] = useState([]); // {url, name}
   const fileInputRef = useRef(null);
   const [fileList, setFileList] = useState([]); // actual File objects
+  const [compressing, setCompressing] = useState(false);
+  const [imgError, setImgError] = useState("");
 
   // Wrap the server action so we can redirect on success.
+  // try/catch here prevents crashes to the generic error page —
+  // network-level failures show a friendly inline message instead.
   async function handleSubmit(prev, formData) {
-    const res = await submitCustomOrder(prev, formData);
-    if (res?.success) {
+    if (compressing) {
+      return { error: "جارٍ تجهيز الصور… انتظري لحظة ثم اضغطي إرسال مرة أخرى." };
+    }
+    try {
+      // Client-side guard: keep total upload under the server-action body limit.
+      const totalBytes = formData
+        .getAll("reference_images")
+        .filter((f) => f && typeof f === "object" && f.size > 0)
+        .reduce((s, f) => s + (f.size || 0), 0);
+      if (totalBytes > 7 * 1024 * 1024) {
+        return {
+          error:
+            "حجم الصور كبير جدًا، احذفي بعض الصور أو اختاري صورًا أصغر ثم أعيدي المحاولة.",
+        };
+      }
+
+      const res = await submitCustomOrder(prev, formData);
+      if (res?.success) {
       // Build WhatsApp message and stash for the confirmation page.
       const msg = customOrderWhatsappMessage({
         orderNumber: res.orderNumber,
@@ -56,18 +77,47 @@ export default function CustomOrderForm() {
       } catch {}
       router.push(`/custom-order-confirmation/${res.id}`);
       return prev;
+      }
+      return res;
+    } catch {
+      return {
+        error: "تعذّر إرسال الطلب، تحققي من اتصال الإنترنت وحاولي مرة أخرى.",
+      };
     }
-    return res;
   }
 
-  function onFilesSelected(e) {
+  // Compress images in the browser (~1MB each) so phone photos don't exceed
+  // the server-action body limit and uploads stay fast for guests too.
+  async function onFilesSelected(e) {
     const incoming = Array.from(e.target.files || []);
-    const combined = [...fileList, ...incoming].slice(0, MAX_IMAGES);
-    setFileList(combined);
-    setPreviews(
-      combined.map((f) => ({ url: URL.createObjectURL(f), name: f.name }))
-    );
-    syncInput(combined);
+    if (!incoming.length) return;
+    setImgError("");
+
+    const room = MAX_IMAGES - fileList.length;
+    if (room <= 0) return;
+    const picked = incoming.slice(0, room);
+
+    const bad = picked.find((f) => !String(f.type || "").startsWith("image/"));
+    if (bad) {
+      setImgError("يُسمح برفع الصور فقط (JPG، PNG، WEBP).");
+      return;
+    }
+
+    setCompressing(true);
+    try {
+      const compressed = [];
+      for (const f of picked) {
+        compressed.push(await compressImageFile(f));
+      }
+      const combined = [...fileList, ...compressed].slice(0, MAX_IMAGES);
+      setFileList(combined);
+      setPreviews(
+        combined.map((f) => ({ url: URL.createObjectURL(f), name: f.name }))
+      );
+      syncInput(combined);
+    } finally {
+      setCompressing(false);
+    }
   }
 
   function removeImage(i) {
@@ -88,6 +138,11 @@ export default function CustomOrderForm() {
   return (
     <form action={formAction} className="space-y-7">
       {state?.error && <Alert type="error">{state.error}</Alert>}
+
+      <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha">
+        🌸 يمكنك إرسال طلبك الخاص <span className="font-black">بدون إنشاء حساب</span> —
+        فقط املئي البيانات وسيتواصل معك فريقنا عبر واتساب.
+      </div>
 
       {/* Personal info */}
       <fieldset className="space-y-4">
@@ -262,6 +317,16 @@ export default function CustomOrderForm() {
         <p className="text-sm text-warm-mocha/60 font-bold mb-3">
           ارفعي صورًا توضّح فكرتك (اختياري — حتى {MAX_IMAGES} صور).
         </p>
+        {compressing && (
+          <p className="text-sm font-black text-soft-rose mb-3 animate-pulse">
+            ⏳ جارٍ تجهيز الصور وضغطها…
+          </p>
+        )}
+        {imgError && (
+          <div className="mb-3">
+            <Alert type="error">{imgError}</Alert>
+          </div>
+        )}
 
         <input
           ref={fileInputRef}
