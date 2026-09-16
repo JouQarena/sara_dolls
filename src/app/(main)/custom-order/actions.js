@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import {
   isValidEgyptPhone,
@@ -22,6 +22,22 @@ function isConfigured() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
+}
+
+// Writer client for saving custom orders. Uses the service-role key (server-only)
+// so guest orders (user_id = null) can be inserted AND read back
+// (anon SELECT policies can never return a guest's own just-created row,
+//  which made `.insert().select().single()` fail for guests).
+function getWriteClient() {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      return createAdminClient();
+    } catch {}
+  }
+  console.error(
+    "[custom-order] SUPABASE_SERVICE_ROLE_KEY is missing — guest custom orders will fail. Falling back to anon client."
+  );
+  return createClient();
 }
 
 export async function submitCustomOrder(prevState, formData) {
@@ -99,6 +115,7 @@ export async function submitCustomOrder(prevState, formData) {
 
   try {
     const supabase = createClient();
+    const writer = getWriteClient(); // writes (uploads + order insert)
     const user = await getCurrentUser();
 
     // ---- upload reference images ----
@@ -108,10 +125,11 @@ export async function submitCustomOrder(prevState, formData) {
       const path = `${Date.now()}-${Math.random()
         .toString(36)
         .slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await writer.storage
         .from(STORAGE_BUCKETS.CUSTOM_REFS)
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) {
+        console.error("[custom-order] image upload failed:", upErr?.message);
         return { error: "تعذّر رفع الصور، حاولي مرة أخرى." };
       }
       const { data: pub } = supabase.storage
@@ -121,7 +139,7 @@ export async function submitCustomOrder(prevState, formData) {
     }
 
     // ---- insert custom order ----
-    const { data, error } = await supabase
+    const { data, error } = await writer
       .from("custom_orders")
       .insert({
         user_id: user?.id || null,
