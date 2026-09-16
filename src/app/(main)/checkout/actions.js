@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getSiteSettings, computeShipping } from "@/lib/settings";
 import {
@@ -14,6 +14,24 @@ function isConfigured() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
+}
+
+// Writer client for saving orders. Uses the service-role key (server-only) so that:
+//  - guest orders (user_id = null) can be inserted AND read back
+//    (anon SELECT policies can never return a guest's own just-created row,
+//     which made `.insert().select().single()` fail for guests), and
+//  - stock can be decremented (products table is admin-write-only).
+// Reads (products/prices/discounts) stay on the anon client — least privilege.
+function getWriteClient() {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      return createAdminClient();
+    } catch {}
+  }
+  console.error(
+    "[checkout] SUPABASE_SERVICE_ROLE_KEY is missing — guest checkout will fail. Falling back to anon client."
+  );
+  return createClient();
 }
 
 const VALID_GOV = new Set(EGYPT_GOVERNORATES.map((g) => g.ar));
@@ -128,7 +146,8 @@ export async function placeOrder(formData) {
   }
 
   try {
-    const supabase = createClient();
+    const supabase = createClient(); // reads (products, discounts, settings)
+    const writer = getWriteClient(); // writes (order, items, stock, uploads)
     // Guest checkout is allowed — user may be null (order is linked when logged in).
     const user = await getCurrentUser();
 
@@ -190,15 +209,18 @@ export async function placeOrder(formData) {
       const path = `${Date.now()}-${Math.random()
         .toString(36)
         .slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await writer.storage
         .from(STORAGE_BUCKETS.INSTAPAY)
         .upload(path, file, { contentType: file.type });
-      if (upErr) return { error: "تعذّر رفع إيصال الدفع." };
+      if (upErr) {
+        console.error("[checkout] instapay upload failed:", upErr?.message);
+        return { error: "تعذّر رفع إيصال الدفع." };
+      }
       instapayUrl = path; // private bucket — store path, admin views via signed URL
     }
 
     // Insert order
-    const { data: order, error: orderErr } = await supabase
+    const { data: order, error: orderErr } = await writer
       .from("orders")
       .insert({
         user_id: user?.id || null,
@@ -221,10 +243,13 @@ export async function placeOrder(formData) {
       .select("id, order_number")
       .single();
 
-    if (orderErr) return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
+    if (orderErr) {
+      console.error("[checkout] order insert failed:", orderErr?.message);
+      return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
+    }
 
     // Insert order items
-    const { error: itemsErr } = await supabase.from("order_items").insert(
+    const { error: itemsErr } = await writer.from("order_items").insert(
       lineItems.map((li) => ({
         order_id: order.id,
         product_id: li.product_id,
@@ -233,21 +258,26 @@ export async function placeOrder(formData) {
         price_at_purchase: li.price_at_purchase,
       }))
     );
-    if (itemsErr) return { error: "تعذّر حفظ تفاصيل الطلب." };
+    if (itemsErr) {
+      console.error("[checkout] order items insert failed:", itemsErr?.message);
+      return { error: "تعذّر حفظ تفاصيل الطلب." };
+    }
 
-    // Reduce stock (physical only)
+    // Reduce stock (physical only) — via writer so it actually applies.
     for (const li of lineItems) {
       if (!li.isPattern) {
-        await supabase
+        const { error: stockErr } = await writer
           .from("products")
           .update({ stock: Math.max(0, li.currentStock - li.quantity) })
           .eq("id", li.product_id);
+        if (stockErr)
+          console.error("[checkout] stock update failed:", stockErr?.message);
       }
     }
 
     // Increment discount usage
     if (appliedCode) {
-      await supabase.rpc("increment_discount_use", { p_code: appliedCode }).catch(
+      await writer.rpc("increment_discount_use", { p_code: appliedCode }).catch(
         () => {}
       );
     }
