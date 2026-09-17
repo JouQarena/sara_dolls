@@ -1,10 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { cookies } from "next/headers";
 import { User } from "lucide-react";
 import { getUserAndProfile, isAdminUser } from "@/lib/auth";
+import { GENDER_COOKIE, normalizeGender, gx } from "@/lib/genderedText";
 import AccountMenu from "@/components/AccountMenu";
 import MobileNav from "@/components/MobileNav";
 import NavCartIcons from "@/components/NavCartIcons";
+import GenderToggle from "@/components/GenderToggle";
 
 const NAV_LINKS = [
   { href: "/", label: "الرئيسية" },
@@ -17,12 +20,18 @@ const NAV_LINKS = [
 export default async function Navbar() {
   const { user, profile } = await getUserAndProfile();
   const admin = await isAdminUser();
+  // Speech gender (no extra query — profile is already fetched).
+  const gender = user
+    ? profile?.gender === "male"
+      ? "male"
+      : "female"
+    : normalizeGender(cookies().get(GENDER_COOKIE)?.value);
 
   return (
     <>
       {/* Announcement bar */}
       <div className="bg-soft-rose text-white text-xs md:text-sm font-extrabold py-2.5 px-4 text-center">
-        🌸 شحن مجاني داخل مصر للطلبات فوق 1000 ج.م — تسوقي الآن!
+        {gx(gender, "🌸 شحن مجاني داخل مصر للطلبات فوق 1000 ج.م — تسوقي الآن!", "🌸 شحن مجاني داخل مصر للطلبات فوق 1000 ج.م — تسوق الآن!")}
       </div>
 
       <header className="glass-header sticky top-0 z-40 px-4 md:px-8 py-3">
@@ -61,6 +70,10 @@ export default async function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-1.5 md:gap-2.5">
+            {/* 👩/👨 speech toggle (desktop — mobile lives in the drawer) */}
+            <div className="hidden lg:block">
+              <GenderToggle />
+            </div>
             <NavCartIcons />
 
             {user ? (

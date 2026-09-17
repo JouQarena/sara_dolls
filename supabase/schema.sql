@@ -35,6 +35,7 @@ create table if not exists public.profiles (
   id                  uuid primary key references auth.users(id) on delete cascade,
   full_name           text,
   phone_number        text,
+  gender              text check (gender in ('male', 'female')),
   default_governorate text,
   default_city        text,
   default_address     text,
@@ -49,11 +50,12 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, phone_number)
+  insert into public.profiles (id, full_name, phone_number, gender)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
-    coalesce(new.raw_user_meta_data->>'phone_number', '')
+    coalesce(new.raw_user_meta_data->>'phone_number', ''),
+    coalesce(new.raw_user_meta_data->>'gender', 'female')
   )
   on conflict (id) do nothing;
   return new;

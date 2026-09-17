@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import {
   isValidEgyptPhone,
   normalizeEgyptPhone,
@@ -24,8 +25,11 @@ export async function updateProfile(prevState, formData) {
   const governorate = String(formData.get("default_governorate") || "").trim();
   const city = String(formData.get("default_city") || "").trim();
   const address = String(formData.get("default_address") || "").trim();
+  const gender = await getUserGender();
+  const newGender = formData.get("gender") === "male" ? "male" : "female";
 
-  if (fullName.length < 2) return { error: "من فضلك أدخلي اسمك بالكامل." };
+  if (fullName.length < 2)
+    return { error: gx(gender, "من فضلك أدخلي اسمك بالكامل.", "من فضلك أدخل اسمك بالكامل.") };
   if (phoneRaw && !isValidEgyptPhone(phoneRaw))
     return { error: "رقم الهاتف غير صحيح. مثال: 01012345678" };
 
@@ -42,13 +46,15 @@ export async function updateProfile(prevState, formData) {
       .update({
         full_name: fullName,
         phone_number: phoneRaw ? normalizeEgyptPhone(phoneRaw) : null,
+        gender: newGender,
         default_governorate: governorate || null,
         default_city: city || null,
         default_address: address || null,
       })
       .eq("id", user.id);
 
-    if (error) return { error: "تعذّر حفظ البيانات، حاولي مرة أخرى." };
+    if (error)
+      return { error: gx(gender, "تعذّر حفظ البيانات، حاولي مرة أخرى.", "تعذّر حفظ البيانات، حاول مرة أخرى.") };
 
     revalidatePath("/profile");
     return { success: "تم تحديث بياناتك بنجاح 🌸", type: "profile" };
@@ -71,9 +77,10 @@ export async function changePassword(prevState, formData) {
     return { success: "تم تغيير كلمة المرور (وضع المعاينة).", type: "password" };
 
   try {
+    const gender = await getUserGender();
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
-    if (error) return { error: translateAuthError(error.message), type: "password" };
+    if (error) return { error: translateAuthError(error.message, gender), type: "password" };
     return { success: "تم تغيير كلمة المرور بنجاح 🔒", type: "password" };
   } catch {
     return { error: "حدث خطأ غير متوقع.", type: "password" };

@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
-export default function AuthLayout({ children }) {
+export default async function AuthLayout({ children }) {
+  const gender = await getUserGender();
   return (
     <main className="min-h-screen bg-gradient-to-b from-pastel-pink/40 via-cream to-cream flex flex-col">
       <div className="flex-1 flex items-center justify-center px-4 py-10">
@@ -33,7 +36,7 @@ export default function AuthLayout({ children }) {
           </div>
 
           <p className="text-center text-xs font-bold text-warm-mocha/50 mt-6">
-            بالاستمرار فإنك توافقين على{" "}
+            {gx(gender, "بالاستمرار فإنك توافقين على", "بالاستمرار فإنك توافق على")}{" "}
             <Link
               href="/اتفاقية-المستخدم"
               className="text-soft-rose underline underline-offset-2"

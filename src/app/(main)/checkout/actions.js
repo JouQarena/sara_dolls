@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import { getSiteSettings, computeShipping } from "@/lib/settings";
 import {
   isValidEgyptPhone,
@@ -39,7 +40,10 @@ const VALID_GOV = new Set(EGYPT_GOVERNORATES.map((g) => g.ar));
 // ---- Validate a discount code (called from the cart/checkout) ----
 export async function validateDiscount(code, subtotal) {
   const c = String(code || "").trim().toUpperCase();
-  if (!c) return { valid: false, error: "أدخلي كود الخصم." };
+  if (!c) {
+    const gender = await getUserGender();
+    return { valid: false, error: gx(gender, "أدخلي كود الخصم.", "أدخل كود الخصم.") };
+  }
 
   if (!isConfigured()) {
     // Demo: accept SARA10 for 10% off.
@@ -116,13 +120,17 @@ export async function placeOrder(formData) {
   const agreed = formData.get("agreed_to_terms") === "on";
 
   // Validate
-  if (fullName.length < 2) return { error: "من فضلك أدخلي اسمك بالكامل." };
+  const gender = await getUserGender();
+  if (fullName.length < 2)
+    return { error: gx(gender, "من فضلك أدخلي اسمك بالكامل.", "من فضلك أدخل اسمك بالكامل.") };
   if (!isValidEgyptPhone(phoneRaw))
     return { error: "رقم الهاتف غير صحيح. مثال: 01012345678" };
-  if (!VALID_GOV.has(governorate)) return { error: "من فضلك اختاري المحافظة." };
-  if (address.length < 5) return { error: "من فضلك أدخلي عنوانًا واضحًا." };
+  if (!VALID_GOV.has(governorate))
+    return { error: gx(gender, "من فضلك اختاري المحافظة.", "من فضلك اختار المحافظة.") };
+  if (address.length < 5)
+    return { error: gx(gender, "من فضلك أدخلي عنوانًا واضحًا.", "من فضلك أدخل عنوانًا واضحًا.") };
   if (!["cash_on_delivery", "instapay"].includes(paymentMethod))
-    return { error: "من فضلك اختاري طريقة الدفع." };
+    return { error: gx(gender, "من فضلك اختاري طريقة الدفع.", "من فضلك اختار طريقة الدفع.") };
   if (!agreed) return { error: "يجب الموافقة على الشروط للمتابعة." };
 
   const phone = normalizeEgyptPhone(phoneRaw);
@@ -245,7 +253,7 @@ export async function placeOrder(formData) {
 
     if (orderErr) {
       console.error("[checkout] order insert failed:", orderErr?.message);
-      return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
+      return { error: gx(gender, "تعذّر حفظ الطلب، حاولي مرة أخرى.", "تعذّر حفظ الطلب، حاول مرة أخرى.") };
     }
 
     // Insert order items
@@ -289,10 +297,11 @@ export async function placeOrder(formData) {
       total,
     };
   } catch {
-    return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
+    return { error: gx(gender, "تعذّر حفظ الطلب، حاولي مرة أخرى.", "تعذّر حفظ الطلب، حاول مرة أخرى.") };
   }
  } catch {
    // Safety net: catches anything thrown before the inner try.
-   return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
+   const fallbackGender = await getUserGender().catch(() => "female");
+   return { error: gx(fallbackGender, "حدث خطأ غير متوقع، حاولي مرة أخرى.", "حدث خطأ غير متوقع، حاول مرة أخرى.") };
  }
 }

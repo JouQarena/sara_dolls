@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isValidEgyptPhone, normalizeEgyptPhone } from "@/lib/validation";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export async function sendContactMessage(prevState, formData) {
   const name = String(formData.get("name") || "").trim();
@@ -9,8 +11,11 @@ export async function sendContactMessage(prevState, formData) {
   const phoneRaw = String(formData.get("phone") || "").trim();
   const message = String(formData.get("message") || "").trim();
 
-  if (name.length < 2) return { error: "من فضلك أدخلي اسمك." };
-  if (message.length < 5) return { error: "من فضلك اكتبي رسالتك." };
+  const gender = await getUserGender();
+  if (name.length < 2)
+    return { error: gx(gender, "من فضلك أدخلي اسمك.", "من فضلك أدخل اسمك.") };
+  if (message.length < 5)
+    return { error: gx(gender, "من فضلك اكتبي رسالتك.", "من فضلك اكتب رسالتك.") };
   if (phoneRaw && !isValidEgyptPhone(phoneRaw))
     return { error: "رقم الهاتف غير صحيح. مثال: 01012345678" };
 
@@ -18,7 +23,7 @@ export async function sendContactMessage(prevState, formData) {
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
-    return { error: "الخدمة غير متاحة حاليًا. حاولي لاحقًا." };
+    return { error: gx(gender, "الخدمة غير متاحة حاليًا. حاولي لاحقًا.", "الخدمة غير متاحة حاليًا. حاول لاحقًا.") };
   }
 
   try {
@@ -29,9 +34,9 @@ export async function sendContactMessage(prevState, formData) {
       phone: phoneRaw ? normalizeEgyptPhone(phoneRaw) : null,
       message,
     });
-    if (error) return { error: "تعذّر إرسال الرسالة، حاولي مرة أخرى." };
+    if (error) return { error: gx(gender, "تعذّر إرسال الرسالة، حاولي مرة أخرى.", "تعذّر إرسال الرسالة، حاول مرة أخرى.") };
     return { success: "تم إرسال رسالتك بنجاح! سنردّ عليك في أقرب وقت 🌸" };
   } catch {
-    return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
+    return { error: gx(gender, "حدث خطأ غير متوقع، حاولي مرة أخرى.", "حدث خطأ غير متوقع، حاول مرة أخرى.") };
   }
 }

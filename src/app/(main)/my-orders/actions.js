@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import { canCancelOrder } from "@/lib/orderStatus";
 
 function isConfigured() {
@@ -46,7 +47,10 @@ export async function cancelOrder(prevState, formData) {
       .eq("id", orderId)
       .eq("user_id", user.id);
 
-    if (error) return { error: "تعذّر إلغاء الطلب، حاولي مرة أخرى." };
+    if (error) {
+      const gender = await getUserGender();
+      return { error: gx(gender, "تعذّر إلغاء الطلب، حاولي مرة أخرى.", "تعذّر إلغاء الطلب، حاول مرة أخرى.") };
+    }
 
     revalidatePath("/my-orders");
     return { success: "تم إلغاء الطلب بنجاح." };

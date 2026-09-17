@@ -11,6 +11,8 @@ import ImageGallery from "@/components/product/ImageGallery";
 import AddToCartBox from "@/components/AddToCartBox";
 import ProductCard from "@/components/ProductCard";
 import StarRating from "@/components/StarRating";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductDetailPage({ params }) {
+  const gender = await getUserGender();
   const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
@@ -199,7 +202,7 @@ export default async function ProductDetailPage({ params }) {
             </h2>
             {reviews.length === 0 ? (
               <p className="text-warm-mocha/60 font-bold bg-cream rounded-2xl p-6 text-center">
-                لا توجد تقييمات بعد — كوني أول من يقيّم هذا المنتج 🌸
+                {gx(gender, "لا توجد تقييمات بعد — كوني أول من يقيّم هذا المنتج 🌸", "لا توجد تقييمات بعد — كن أول من يقيّم هذا المنتج 🌸")}
               </p>
             ) : (
               <div className="space-y-4">
@@ -214,7 +217,7 @@ export default async function ProductDetailPage({ params }) {
                           {(r.author || "ع").charAt(0)}
                         </span>
                         <span className="font-black text-warm-mocha text-sm">
-                          {r.author || "عميلة"}
+                          {r.author || gx(gender, "عميلة", "عميل")}
                         </span>
                       </div>
                       <StarRating value={r.rating} />
@@ -229,15 +232,15 @@ export default async function ProductDetailPage({ params }) {
           </div>
 
           <aside className="bg-cream rounded-3xl p-6 border border-pastel-pink/40 h-fit">
-            <p className="font-black text-warm-mocha mb-2">✨ تحبّي تصميم مخصّص؟</p>
+            <p className="font-black text-warm-mocha mb-2">{gx(gender, "✨ تحبّي تصميم مخصّص؟", "✨ تحب تصميم مخصّص؟")}</p>
             <p className="text-sm text-warm-mocha/70 font-semibold leading-relaxed mb-4">
-              لو عايزة قطعة بمواصفات خاصة، احكيلنا فكرتك وهنصنعها مخصوص لك.
+              {gx(gender, "لو عايزة قطعة بمواصفات خاصة، احكيلنا فكرتك وهنصنعها مخصوص لك.", "لو عايز قطعة بمواصفات خاصة، احكيلنا فكرتك وهنصنعها مخصوص لك.")}
             </p>
             <Link
               href="/طلب-خاص"
               className="block text-center bg-soft-rose text-white font-black py-3 rounded-2xl hover:bg-brand-dark transition"
             >
-              اطلبي تصميمك الخاص
+              {gx(gender, "اطلبي تصميمك الخاص", "اطلب تصميمك الخاص")}
             </Link>
           </aside>
         </section>

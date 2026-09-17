@@ -12,16 +12,18 @@ import SubmitButton from "@/components/SubmitButton";
 import { ORDER_TYPES, SIZES, BUDGET_RANGES } from "@/lib/customOrders";
 import { EGYPT_GOVERNORATES } from "@/lib/constants";
 import { compressImageFile } from "@/lib/compressImage";
+import { useGender } from "@/components/GenderProvider";
 import {
   customOrderWhatsappMessage,
   whatsappLink,
 } from "@/lib/whatsapp";
-import { orderTypeLabel, sizeLabel, budgetLabel } from "@/lib/customOrders";
+import { orderTypeLabel, sizeLabelFor, budgetLabel } from "@/lib/customOrders";
 
 const MAX_IMAGES = 5;
 
 export default function CustomOrderForm() {
   const router = useRouter();
+  const { t, gender } = useGender();
   const [state, formAction] = useFormState(handleSubmit, {});
   const [previews, setPreviews] = useState([]); // {url, name}
   const fileInputRef = useRef(null);
@@ -34,7 +36,7 @@ export default function CustomOrderForm() {
   // network-level failures show a friendly inline message instead.
   async function handleSubmit(prev, formData) {
     if (compressing) {
-      return { error: "جارٍ تجهيز الصور… انتظري لحظة ثم اضغطي إرسال مرة أخرى." };
+      return { error: t("جارٍ تجهيز الصور… انتظري لحظة ثم اضغطي إرسال مرة أخرى.", "جارٍ تجهيز الصور… انتظر لحظة ثم اضغط إرسال مرة أخرى.") };
     }
     try {
       // Client-side guard: keep total upload under the server-action body limit.
@@ -45,7 +47,7 @@ export default function CustomOrderForm() {
       if (totalBytes > 7 * 1024 * 1024) {
         return {
           error:
-            "حجم الصور كبير جدًا، احذفي بعض الصور أو اختاري صورًا أصغر ثم أعيدي المحاولة.",
+            t("حجم الصور كبير جدًا، احذفي بعض الصور أو اختاري صورًا أصغر ثم أعيدي المحاولة.", "حجم الصور كبير جدًا، احذف بعض الصور أو اختار صورًا أصغر ثم أعد المحاولة."),
         };
       }
 
@@ -59,7 +61,7 @@ export default function CustomOrderForm() {
         orderType: orderTypeLabel(formData.get("order_type")),
         description: formData.get("description"),
         colors: formData.get("preferred_colors"),
-        size: sizeLabel(formData.get("size")),
+        size: sizeLabelFor(gender, formData.get("size")),
         budget: budgetLabel(formData.get("budget_range")),
         deadline: formData.get("deadline"),
         notes: formData.get("additional_notes"),
@@ -81,7 +83,7 @@ export default function CustomOrderForm() {
       return res;
     } catch {
       return {
-        error: "تعذّر إرسال الطلب، تحققي من اتصال الإنترنت وحاولي مرة أخرى.",
+        error: t("تعذّر إرسال الطلب، تحققي من اتصال الإنترنت وحاولي مرة أخرى.", "تعذّر إرسال الطلب، تحقق من اتصال الإنترنت وحاول مرة أخرى."),
       };
     }
   }
@@ -141,7 +143,7 @@ export default function CustomOrderForm() {
 
       <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha">
         🌸 يمكنك إرسال طلبك الخاص <span className="font-black">بدون إنشاء حساب</span> —
-        فقط املئي البيانات وسيتواصل معك فريقنا عبر واتساب.
+        {t("فقط املئي البيانات وسيتواصل معك فريقنا عبر واتساب.", "فقط املأ البيانات وسيتواصل معك فريقنا عبر واتساب.")}
       </div>
 
       {/* Personal info */}
@@ -177,7 +179,7 @@ export default function CustomOrderForm() {
               name="governorate"
               className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
             >
-              <option value="">اختاري المحافظة (اختياري)</option>
+              <option value="">{t("اختاري المحافظة (اختياري)", "اختار المحافظة (اختياري)")}</option>
               {EGYPT_GOVERNORATES.map((g) => (
                 <option key={g.slug} value={g.ar}>
                   {g.ar}
@@ -210,7 +212,7 @@ export default function CustomOrderForm() {
               className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
             >
               <option value="" disabled>
-                اختاري نوع الطلب
+                {t("اختاري نوع الطلب", "اختار نوع الطلب")}
               </option>
               {ORDER_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>
@@ -229,10 +231,10 @@ export default function CustomOrderForm() {
               defaultValue=""
               className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
             >
-              <option value="">اختاري المقاس (اختياري)</option>
+              <option value="">{t("اختاري المقاس (اختياري)", "اختار المقاس (اختياري)")}</option>
               {SIZES.map((s) => (
                 <option key={s.value} value={s.value}>
-                  {s.label}
+                  {sizeLabelFor(gender, s.value)}
                 </option>
               ))}
             </select>
@@ -247,7 +249,7 @@ export default function CustomOrderForm() {
             name="description"
             required
             rows={5}
-            placeholder="مثال: عايزة دمية تشبه بنتي، شعرها بني وعيونها عسلية، لابسة فستان وردي مكتوب عليه اسمها..."
+            placeholder={t("مثال: عايزة دمية تشبه بنتي، شعرها بني وعيونها عسلية، لابسة فستان وردي مكتوب عليه اسمها...", "مثال: عايز دمية شعرها بني وعيونها عسلية، لابسة فستان وردي مكتوب عليه اسمها...")}
             className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold placeholder:text-warm-mocha/40 outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow resize-none"
           />
         </label>
@@ -268,7 +270,7 @@ export default function CustomOrderForm() {
               defaultValue=""
               className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
             >
-              <option value="">اختاري الميزانية (اختياري)</option>
+              <option value="">{t("اختاري الميزانية (اختياري)", "اختار الميزانية (اختياري)")}</option>
               {BUDGET_RANGES.map((b) => (
                 <option key={b.value} value={b.value}>
                   {b.label}
@@ -289,7 +291,7 @@ export default function CustomOrderForm() {
               className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
             />
             <span className="block text-xs text-warm-mocha/50 mt-1">
-              اختياري — امتى محتاجة الطلب؟
+              {t("اختياري — امتى محتاجة الطلب؟", "اختياري — امتى محتاج الطلب؟")}
             </span>
           </label>
         </div>
@@ -364,7 +366,7 @@ export default function CustomOrderForm() {
             >
               <div className="text-center">
                 <ImagePlus className="w-6 h-6 mx-auto" />
-                <span className="text-[0.65rem] font-black block mt-1">أضيفي صورة</span>
+                <span className="text-[0.65rem] font-black block mt-1">{t("أضيفي صورة", "أضف صورة")}</span>
               </div>
             </label>
           )}

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Home, ShoppingBag } from "lucide-react";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export const metadata = {
   title: "الصفحة غير موجودة | سارة دولز",
 };
 
-export default function NotFound() {
+export default async function NotFound() {
+  const gender = await getUserGender();
   return (
     <main className="min-h-screen bg-gradient-to-b from-pastel-pink/40 via-cream to-cream flex items-center justify-center px-5 py-16">
       <div className="text-center max-w-md">
@@ -23,8 +26,7 @@ export default function NotFound() {
           الصفحة غير موجودة
         </h1>
         <p className="text-warm-mocha/60 font-bold leading-relaxed mb-7">
-          يبدو أن هذه الصفحة قد ضاعت بين خيوط الكروشيه 🧶 — لكن لا تقلقي، يمكنك
-          العودة للرئيسية أو متابعة التسوّق.
+          {gx(gender, "يبدو أن هذه الصفحة قد ضاعت بين خيوط الكروشيه 🧶 — لكن لا تقلقي، يمكنك العودة للرئيسية أو متابعة التسوّق.", "يبدو أن هذه الصفحة قد ضاعت بين خيوط الكروشيه 🧶 — لكن لا تقلق، يمكنك العودة للرئيسية أو متابعة التسوّق.")}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Link

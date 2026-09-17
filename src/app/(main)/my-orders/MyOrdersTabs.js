@@ -26,9 +26,10 @@ import {
 } from "@/lib/orderStatus";
 import {
   orderTypeLabel,
-  sizeLabel,
+  sizeLabelFor,
   budgetLabel,
 } from "@/lib/customOrders";
+import { useGender } from "@/components/GenderProvider";
 
 export default function MyOrdersTabs({ orders, customOrders }) {
   const [tab, setTab] = useState("regular");
@@ -70,12 +71,13 @@ function TabButton({ active, onClick, icon: Icon, children }) {
 
 /* ---------------- Regular Orders ---------------- */
 function RegularOrders({ orders }) {
+  const { t } = useGender();
   if (orders.length === 0) {
     return (
       <EmptyState
         icon={Package}
         title="لا توجد طلبات بعد"
-        text="ابدئي التسوّق من مجموعتنا المصنوعة بحب 🌸"
+        text={t("ابدئي التسوّق من مجموعتنا المصنوعة بحب 🌸", "ابدأ التسوّق من مجموعتنا المصنوعة بحب 🌸")}
       />
     );
   }
@@ -184,6 +186,7 @@ function RegularOrderCard({ order }) {
 
 /* ---------------- Custom Orders ---------------- */
 function CustomOrders({ orders }) {
+  const { t } = useGender();
   if (orders.length === 0) {
     return (
       <EmptyState
@@ -191,7 +194,7 @@ function CustomOrders({ orders }) {
         title="لا توجد طلبات خاصة بعد"
         text="عندك فكرة في بالك؟ احكيلنا وهنصنعها مخصوص لك ✨"
         ctaHref="/طلب-خاص"
-        ctaLabel="اطلبي تصميمك الخاص"
+        ctaLabel={t("اطلبي تصميمك الخاص", "اطلب تصميمك الخاص")}
       />
     );
   }
@@ -207,6 +210,7 @@ function CustomOrders({ orders }) {
 function CustomOrderCard({ order }) {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(respondToQuote, {});
+  const { gender } = useGender();
   const isQuoted = order.status === "quoted" && !state?.success;
 
   return (
@@ -244,7 +248,7 @@ function CustomOrderCard({ order }) {
           <div className="text-sm font-bold text-warm-mocha/75 bg-cream rounded-2xl p-4 space-y-1.5">
             <InfoLine label="الوصف" value={order.description} />
             <InfoLine label="الألوان" value={order.preferred_colors} />
-            <InfoLine label="المقاس" value={sizeLabel(order.size)} />
+            <InfoLine label="المقاس" value={sizeLabelFor(gender, order.size)} />
             <InfoLine label="الميزانية" value={budgetLabel(order.budget_range)} />
             <InfoLine label="الموعد" value={order.deadline ? formatDateAr(order.deadline) : "—"} />
           </div>
@@ -331,7 +335,9 @@ function InfoLine({ label, value }) {
   );
 }
 
-function EmptyState({ icon: Icon, title, text, ctaHref = "/shop", ctaLabel = "ابدئي التسوّق" }) {
+function EmptyState({ icon: Icon, title, text, ctaHref = "/shop", ctaLabel = null }) {
+  const { t } = useGender();
+  const label = ctaLabel || t("ابدئي التسوّق", "ابدأ التسوّق");
   return (
     <div className="text-center py-16 bg-white rounded-3xl border border-pastel-pink/40">
       <Icon className="w-14 h-14 mx-auto text-pastel-pink mb-3" />
@@ -341,7 +347,7 @@ function EmptyState({ icon: Icon, title, text, ctaHref = "/shop", ctaLabel = "ا
         href={ctaHref}
         className="inline-block bg-soft-rose text-white font-black px-6 py-3 rounded-2xl hover:bg-brand-dark transition"
       >
-        {ctaLabel}
+        {label}
       </Link>
     </div>
   );

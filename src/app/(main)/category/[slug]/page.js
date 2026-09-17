@@ -9,6 +9,8 @@ import {
 import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import { PageHeader } from "@/components/legal";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function CategoryPage({ params, searchParams }) {
+  const gender = await getUserGender();
   const cat = await getCategoryBySlug(params.slug);
   if (!cat) notFound();
   if (cat.is_special) redirect(`/${encodeURIComponent("طلب-خاص")}`);
@@ -77,7 +80,7 @@ export default async function CategoryPage({ params, searchParams }) {
               href="/shop"
               className="inline-block mt-4 bg-soft-rose text-white font-black px-6 py-3 rounded-2xl hover:bg-brand-dark transition"
             >
-              تصفّحي كل المنتجات
+              {gx(gender, "تصفّحي كل المنتجات", "تصفّح كل المنتجات")}
             </Link>
           </div>
         ) : (

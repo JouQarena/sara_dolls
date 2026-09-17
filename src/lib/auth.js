@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { GENDER_COOKIE, normalizeGender } from "@/lib/genderedText";
 
 function isConfigured() {
   return Boolean(
@@ -48,4 +50,33 @@ export async function isAdminUser() {
   const user = await getCurrentUser();
   const adminEmail = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
   return Boolean(user && adminEmail && user.email?.toLowerCase() === adminEmail);
+}
+
+// How should the site address the current visitor? ('male' | 'female')
+//   logged-in → profiles.gender (chosen at signup, editable in profile)
+//   guest     → the sara_gender cookie set by the 👩/👨 toggle
+//   fallback  → 'female' (brand default)
+export async function getUserGender() {
+  try {
+    const user = await getCurrentUser();
+    if (user) {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("profiles")
+          .select("gender")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (data?.gender === "male" || data?.gender === "female")
+          return data.gender;
+      } catch {}
+      const meta = user.user_metadata?.gender;
+      if (meta === "male" || meta === "female") return meta;
+      return "female";
+    }
+    const cookieGender = cookies().get(GENDER_COOKIE)?.value;
+    return normalizeGender(cookieGender);
+  } catch {
+    return "female";
+  }
 }

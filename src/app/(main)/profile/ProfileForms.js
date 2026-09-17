@@ -5,9 +5,11 @@ import { updateProfile, changePassword } from "./actions";
 import { Field, PasswordField, Alert } from "@/components/forms";
 import SubmitButton from "@/components/SubmitButton";
 import { EGYPT_GOVERNORATES } from "@/lib/constants";
+import { useGender } from "@/components/GenderProvider";
 
 export function ProfileInfoForm({ profile, email }) {
   const [state, formAction] = useFormState(updateProfile, {});
+  const { t } = useGender();
 
   return (
     <section className="bg-white rounded-3xl p-6 border border-pastel-pink/40">
@@ -49,6 +51,35 @@ export function ProfileInfoForm({ profile, email }) {
           />
         </label>
 
+        {/* Gender — how the site addresses you */}
+        <div>
+          <span className="block text-sm font-extrabold text-warm-mocha mb-1.5">
+            الجنس
+          </span>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex items-center justify-center gap-2 rounded-2xl border-2 border-pastel-pink/60 bg-cream/60 px-4 py-2.5 font-black text-warm-mocha text-sm cursor-pointer transition has-[:checked]:border-soft-rose has-[:checked]:bg-pastel-pink/15">
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                defaultChecked={profile?.gender !== "male"}
+                className="w-4 h-4 accent-soft-rose"
+              />
+              👩 أنثى
+            </label>
+            <label className="flex items-center justify-center gap-2 rounded-2xl border-2 border-pastel-pink/60 bg-cream/60 px-4 py-2.5 font-black text-warm-mocha text-sm cursor-pointer transition has-[:checked]:border-soft-rose has-[:checked]:bg-pastel-pink/15">
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                defaultChecked={profile?.gender === "male"}
+                className="w-4 h-4 accent-soft-rose"
+              />
+              👨 ذكر
+            </label>
+          </div>
+        </div>
+
         <div className="h-px bg-pastel-pink/30" />
         <p className="font-black text-warm-mocha text-sm">العنوان الافتراضي</p>
 
@@ -62,7 +93,7 @@ export function ProfileInfoForm({ profile, email }) {
               defaultValue={profile?.default_governorate || ""}
               className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
             >
-              <option value="">اختاري المحافظة</option>
+              <option value="">{t("اختاري المحافظة", "اختار المحافظة")}</option>
               {EGYPT_GOVERNORATES.map((g) => (
                 <option key={g.slug} value={g.ar}>
                   {g.ar}

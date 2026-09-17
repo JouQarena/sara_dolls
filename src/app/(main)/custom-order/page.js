@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { MessageCircle, Palette, PackageCheck, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/legal";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import CustomOrderForm from "./CustomOrderForm";
 
 export const metadata = {
@@ -9,18 +11,19 @@ export const metadata = {
     "عندك فكرة في بالك؟ احكيلنا وهنصنعها مخصوص لك بإيدينا. اطلبي دمية أو هدية أو تصميم خاص من سارة دولز.",
 };
 
-const STEPS = [
-  { icon: MessageCircle, title: "احكيلنا فكرتك", desc: "املئي النموذج بالتفاصيل والصور." },
-  { icon: Palette, title: "نرسل عرض السعر", desc: "نراجع طلبك ونتواصل معك بالسعر والمدة." },
-  { icon: PackageCheck, title: "نصنع ونوصّل", desc: "بعد موافقتك نبدأ التنفيذ ونوصّله لك." },
-];
+export default async function CustomOrderPage() {
+  const gender = await getUserGender();
 
-export default function CustomOrderPage() {
+  const STEPS = [
+    { icon: MessageCircle, title: "احكيلنا فكرتك", desc: gx(gender, "املئي النموذج بالتفاصيل والصور.", "املأ النموذج بالتفاصيل والصور.") },
+    { icon: Palette, title: "نرسل عرض السعر", desc: "نراجع طلبك ونتواصل معك بالسعر والمدة." },
+    { icon: PackageCheck, title: "نصنع ونوصّل", desc: "بعد موافقتك نبدأ التنفيذ ونوصّله لك." },
+  ];
   return (
     <main>
       <PageHeader
         emoji="✨"
-        title="اطلبي تصميمك الخاص"
+        title={gx(gender, "اطلبي تصميمك الخاص", "اطلب تصميمك الخاص")}
         subtitle="عندك فكرة معيّنة في بالك؟ شخصية محبّبة؟ هدية مميّزة؟ احكيلنا وهنصنعها مخصوص لك بإيدينا."
       />
 
@@ -50,9 +53,7 @@ export default function CustomOrderPage() {
         <div className="rounded-3xl bg-pastel-pink/25 border border-soft-rose/40 p-5 flex items-start gap-3">
           <Sparkles className="w-6 h-6 text-soft-rose shrink-0 mt-0.5" />
           <p className="text-warm-mocha/85 font-bold leading-relaxed text-sm">
-            كل طلب خاص هو قطعة فريدة تُصنع خصيصًا لكِ. بعد إرسال طلبك، سيراجعه فريقنا
-            ويتواصل معك عبر واتساب لمناقشة التفاصيل وإرسال عرض السعر. لمعرفة شروط
-            العربون ومدة التنفيذ، اطّلعي على{" "}
+            {gx(gender, "كل طلب خاص هو قطعة فريدة تُصنع خصيصًا لكِ. بعد إرسال طلبك، سيراجعه فريقنا ويتواصل معك عبر واتساب لمناقشة التفاصيل وإرسال عرض السعر. لمعرفة شروط العربون ومدة التنفيذ، اطّلعي على", "كل طلب خاص هو قطعة فريدة تُصنع خصيصًا لك. بعد إرسال طلبك، سيراجعه فريقنا ويتواصل معك عبر واتساب لمناقشة التفاصيل وإرسال عرض السعر. لمعرفة شروط العربون ومدة التنفيذ، اطّلع على")}{" "}
             <Link
               href="/سياسة-الطلبات-الخاصة"
               className="text-soft-rose underline underline-offset-2"

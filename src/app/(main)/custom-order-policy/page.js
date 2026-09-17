@@ -7,6 +7,8 @@ import {
   Callout,
   ContactCTA,
 } from "@/components/legal";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export const metadata = {
   title: "سياسة الطلبات الخاصة | سارة دولز",
@@ -14,25 +16,25 @@ export const metadata = {
     "شروط وأحكام الطلبات الخاصة (Custom) في سارة دولز: عروض الأسعار، العربون، مدة التنفيذ، وسياسة عدم الاسترجاع.",
 };
 
-export default function CustomOrderPolicyPage() {
+export default async function CustomOrderPolicyPage() {
+  const gender = await getUserGender();
   return (
     <main>
       <PageHeader
         emoji="✨"
         title="سياسة الطلبات الخاصة"
-        subtitle="كل طلب خاص يُصنع خصيصًا لكِ بإيدينا. نرجو قراءة هذه الشروط قبل تقديم طلبك."
+        subtitle={gx(gender, "كل طلب خاص يُصنع خصيصًا لكِ بإيدينا. نرجو قراءة هذه الشروط قبل تقديم طلبك.", "كل طلب خاص يُصنع خصيصًا لك بإيدينا. نرجو قراءة هذه الشروط قبل تقديم طلبك.")}
         updated="يونيو 2026"
       />
       <LegalContainer>
         <Callout emoji="💝" tone="rose">
-          الطلب الخاص هو قطعة فريدة تُصمّم وتُنفّذ حسب رغبتك أنتِ. لهذا السبب تختلف
-          شروطه عن المنتجات الجاهزة، خاصة فيما يتعلق بالاسترجاع.
+          {gx(gender, "الطلب الخاص هو قطعة فريدة تُصمّم وتُنفّذ حسب رغبتك أنتِ. لهذا السبب تختلف شروطه عن المنتجات الجاهزة، خاصة فيما يتعلق بالاسترجاع.", "الطلب الخاص هو قطعة فريدة تُصمّم وتُنفّذ حسب رغبتك أنت. لهذا السبب تختلف شروطه عن المنتجات الجاهزة، خاصة فيما يتعلق بالاسترجاع.")}
         </Callout>
 
         <Section n="1" title="كيف تعمل الطلبات الخاصة؟">
           <Bullets
             items={[
-              <>تقدّمين طلبك عبر صفحة <Link href="/طلب-خاص" className="text-soft-rose underline underline-offset-2 font-black">«اطلبي تصميمك الخاص»</Link> مع وصف كامل وصور مرجعية إن وُجدت.</>,
+              <>{gx(gender, "تقدّمين طلبك عبر صفحة", "تقدّم طلبك عبر صفحة")} <Link href="/طلب-خاص" className="text-soft-rose underline underline-offset-2 font-black">{gx(gender, "«اطلبي تصميمك الخاص»", "«اطلب تصميمك الخاص»")}</Link> مع وصف كامل وصور مرجعية إن وُجدت.</>,
               "نراجع طلبك ونتواصل معك عبر واتساب لمناقشة التفاصيل.",
               "نرسل لك عرض سعر (Quote) وموعد تنفيذ تقديري.",
               "عند موافقتك يبدأ التنفيذ، ويمكنك متابعة الحالة من صفحة «طلباتي».",
@@ -100,7 +102,7 @@ export default function CustomOrderPolicyPage() {
           <Bullets
             items={[
               "أي تعديل في المواصفات بعد بدء التنفيذ قد يؤثّر على السعر والمدة.",
-              "بتقديمك للطلب الخاص فإنك توافقين على جميع البنود الواردة في هذه السياسة.",
+              gx(gender, "بتقديمك للطلب الخاص فإنك توافقين على جميع البنود الواردة في هذه السياسة.", "بتقديمك للطلب الخاص فإنك توافق على جميع البنود الواردة في هذه السياسة."),
             ]}
           />
         </Section>
@@ -110,7 +112,7 @@ export default function CustomOrderPolicyPage() {
             href="/طلب-خاص"
             className="inline-block bg-soft-rose text-white font-black px-8 py-4 rounded-2xl hover:bg-brand-dark transition shadow-soft text-lg"
           >
-            ✨ ابدئي طلبك الخاص الآن
+            {gx(gender, "✨ ابدئي طلبك الخاص الآن", "✨ ابدأ طلبك الخاص الآن")}
           </Link>
         </div>
 

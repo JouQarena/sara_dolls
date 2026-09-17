@@ -5,9 +5,11 @@ import { useFormState } from "react-dom";
 import { forgotPasswordAction } from "../actions";
 import { Field, Alert } from "@/components/forms";
 import SubmitButton from "@/components/SubmitButton";
+import { useGender } from "@/components/GenderProvider";
 
 export default function ForgotPasswordPage() {
   const [state, formAction] = useFormState(forgotPasswordAction, {});
+  const { t } = useGender();
 
   return (
     <>
@@ -15,7 +17,7 @@ export default function ForgotPasswordPage() {
         إعادة تعيين كلمة المرور
       </h2>
       <p className="text-warm-mocha/60 font-semibold text-sm mb-6">
-        أدخلي بريدك وسنرسل لك رابطاً لإعادة التعيين.
+        {t("أدخلي بريدك وسنرسل لك رابطاً لإعادة التعيين.", "أدخل بريدك وسنرسل لك رابطاً لإعادة التعيين.")}
       </p>
 
       <form action={formAction} className="space-y-4">
@@ -38,7 +40,7 @@ export default function ForgotPasswordPage() {
       </form>
 
       <p className="text-center text-sm font-bold text-warm-mocha/70 mt-6">
-        تذكّرتِ كلمة المرور؟{" "}
+        {t("تذكّرتِ كلمة المرور؟", "تذكّرت كلمة المرور؟")}{" "}
         <Link href="/login" className="text-soft-rose hover:underline">
           العودة لتسجيل الدخول
         </Link>

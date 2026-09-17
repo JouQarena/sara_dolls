@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, Sparkles, ShieldCheck, Gift } from "lucide-react";
 import { PageHeader } from "@/components/legal";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export const metadata = {
   title: "من نحن | سارة دولز",
@@ -32,7 +34,8 @@ const VALUES = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const gender = await getUserGender();
   return (
     <main>
       <PageHeader
@@ -60,8 +63,7 @@ export default function AboutPage() {
             </p>
             <p>
               من الدمى اليدوية، إلى الباترونات الجاهزة، إلى الهدايا للكبار
-              والصغار، وحتى الطلبات الخاصة التي نصنعها حسب فكرتك أنتِ — هدفنا
-              واحد: أن نزرع البهجة في كل بيت.
+              {gx(gender, "والصغار، وحتى الطلبات الخاصة التي نصنعها حسب فكرتك أنتِ — هدفنا واحد: أن نزرع البهجة في كل بيت.", "والصغار، وحتى الطلبات الخاصة التي نصنعها حسب فكرتك أنت — هدفنا واحد: أن نزرع البهجة في كل بيت.")}
             </p>
           </div>
         </div>
@@ -125,7 +127,7 @@ export default function AboutPage() {
             href="/طلب-خاص"
             className="inline-block bg-white text-soft-rose font-black px-7 py-3.5 rounded-2xl hover:bg-cream transition"
           >
-            ✨ اطلبي تصميمك الخاص
+            {gx(gender, "✨ اطلبي تصميمك الخاص", "✨ اطلب تصميمك الخاص")}
           </Link>
         </div>
       </section>

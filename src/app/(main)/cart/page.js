@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 import { useSettings, computeShippingClient } from "@/components/useSettings";
+import { useGender } from "@/components/GenderProvider";
 import { formatEGP } from "@/lib/constants";
 
 export default function CartPage() {
+  const { t } = useGender();
   const { cart, ready, updateQty, removeFromCart, cartSubtotal } = useCart();
   const settings = useSettings();
 
@@ -76,13 +78,13 @@ export default function CartPage() {
         <ShoppingBag className="w-16 h-16 mx-auto text-pastel-pink mb-4" />
         <h1 className="text-2xl font-black text-warm-mocha mb-2">سلتك فارغة</h1>
         <p className="text-warm-mocha/60 font-bold mb-6">
-          لسه ما اخترتِش حاجة؟ تصفّحي مجموعتنا المصنوعة بحب 🌸
+          {t("لسه ما اخترتِش حاجة؟ تصفّحي مجموعتنا المصنوعة بحب 🌸", "لسه ما اخترتش حاجة؟ تصفّح مجموعتنا المصنوعة بحب 🌸")}
         </p>
         <Link
           href="/shop"
           className="inline-block bg-soft-rose text-white font-black px-7 py-3.5 rounded-2xl hover:bg-brand-dark transition"
         >
-          ابدئي التسوّق
+          {t("ابدئي التسوّق", "ابدأ التسوّق")}
         </Link>
       </div>
     );

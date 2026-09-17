@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { useGender } from "@/components/GenderProvider";
 
 const SORTS = [
   { value: "featured", label: "الأكثر تميّزاً" },
@@ -15,6 +16,7 @@ const SORTS = [
 export default function ShopControls({ categories }) {
   const router = useRouter();
   const params = useSearchParams();
+  const { t } = useGender();
 
   const activeCat = params.get("category") || "";
   const activeSort = params.get("sort") || "featured";
@@ -50,7 +52,7 @@ export default function ShopControls({ categories }) {
         <input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="ابحثي عن دمية، باترون، أو هدية..."
+          placeholder={t("ابحثي عن دمية، باترون، أو هدية...", "ابحث عن دمية، باترون، أو هدية...")}
           className="w-full rounded-2xl border border-pastel-pink/60 bg-white pr-12 pl-4 py-3 text-warm-mocha font-semibold placeholder:text-warm-mocha/40 outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow transition"
         />
       </form>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Sparkles, ArrowLeft } from "lucide-react";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 const CATEGORY_EMOJI = {
   dolls: "🧸",
@@ -9,7 +11,8 @@ const CATEGORY_EMOJI = {
   custom: "✨",
 };
 
-export default function CategoryCard({ category }) {
+export default async function CategoryCard({ category }) {
+  const gender = await getUserGender();
   const special = category.is_special;
   const href = special ? "/طلب-خاص" : `/category/${category.slug}`;
   const emoji = CATEGORY_EMOJI[category.slug] || "🌸";
@@ -29,7 +32,7 @@ export default function CategoryCard({ category }) {
           {category.description_ar}
         </p>
         <span className="mt-3 inline-flex items-center gap-1 text-sm font-black bg-white text-soft-rose px-4 py-2 rounded-full">
-          اطلبي الآن <ArrowLeft className="w-4 h-4" />
+          {gx(gender, "اطلبي الآن", "اطلب الآن")} <ArrowLeft className="w-4 h-4" />
         </span>
       </Link>
     );

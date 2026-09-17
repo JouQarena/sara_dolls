@@ -6,11 +6,13 @@ import Image from "next/image";
 import { Heart, Trash2, ShoppingBag, FileText } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 import { useToast } from "@/components/ToastProvider";
+import { useGender } from "@/components/GenderProvider";
 import { formatEGP } from "@/lib/constants";
 
 export default function WishlistPage() {
   const { wishlist, ready, toggleWishlist, addToCart } = useCart();
   const { toast } = useToast();
+  const { t } = useGender();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,13 +62,13 @@ export default function WishlistPage() {
           قائمة المفضلة فارغة
         </h1>
         <p className="text-warm-mocha/60 font-bold mb-6">
-          أضيفي القطع التي تحبّينها لتجديها هنا 💖
+          {t("أضيفي القطع التي تحبّينها لتجديها هنا 💖", "أضف القطع التي تحبها لتجدها هنا 💖")}
         </p>
         <Link
           href="/shop"
           className="inline-block bg-soft-rose text-white font-black px-7 py-3.5 rounded-2xl hover:bg-brand-dark transition"
         >
-          تصفّحي المتجر
+          {t("تصفّحي المتجر", "تصفّح المتجر")}
         </Link>
       </div>
     );

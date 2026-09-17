@@ -26,22 +26,25 @@ export function passwordIssues(pw) {
 }
 
 // Map common Supabase auth errors to friendly Arabic.
-export function translateAuthError(message) {
-  if (!message) return "حدث خطأ غير متوقع، حاولي مرة أخرى.";
+// gender: 'female' (default) | 'male' — adjusts second-person speech.
+export function translateAuthError(message, gender = "female") {
+  const male = gender === "male";
+  const t = (f, m) => (male ? m : f);
+  if (!message) return t("حدث خطأ غير متوقع، حاولي مرة أخرى.", "حدث خطأ غير متوقع، حاول مرة أخرى.");
   const m = message.toLowerCase();
   if (m.includes("invalid login credentials"))
     return "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
   if (m.includes("email not confirmed"))
-    return "لم يتم تأكيد البريد الإلكتروني بعد. تحققي من بريدك.";
+    return t("لم يتم تأكيد البريد الإلكتروني بعد. تحققي من بريدك.", "لم يتم تأكيد البريد الإلكتروني بعد. تحقق من بريدك.");
   if (m.includes("user already registered") || m.includes("already registered"))
-    return "هذا البريد الإلكتروني مسجّل بالفعل. سجّلي الدخول بدلاً من ذلك.";
+    return t("هذا البريد الإلكتروني مسجّل بالفعل. سجّلي الدخول بدلاً من ذلك.", "هذا البريد الإلكتروني مسجّل بالفعل. سجّل الدخول بدلاً من ذلك.");
   if (m.includes("password should be at least"))
     return "يجب أن تكون كلمة المرور 8 أحرف على الأقل.";
   if (m.includes("unable to validate email") || m.includes("invalid email"))
     return "البريد الإلكتروني غير صالح.";
   if (m.includes("rate limit") || m.includes("too many"))
-    return "محاولات كثيرة جدًا. انتظري قليلاً ثم حاولي مرة أخرى.";
+    return t("محاولات كثيرة جدًا. انتظري قليلاً ثم حاولي مرة أخرى.", "محاولات كثيرة جدًا. انتظر قليلاً ثم حاول مرة أخرى.");
   if (m.includes("for security purposes"))
-    return "لأسباب أمنية، انتظري قليلاً قبل المحاولة مرة أخرى.";
+    return t("لأسباب أمنية، انتظري قليلاً قبل المحاولة مرة أخرى.", "لأسباب أمنية، انتظر قليلاً قبل المحاولة مرة أخرى.");
   return message;
 }

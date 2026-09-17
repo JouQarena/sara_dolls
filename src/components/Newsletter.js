@@ -4,9 +4,11 @@ import { useFormState } from "react-dom";
 import { Mail } from "lucide-react";
 import { subscribeNewsletter } from "@/app/(main)/newsletter-actions";
 import SubmitButton from "@/components/SubmitButton";
+import { useGender } from "@/components/GenderProvider";
 
 export default function Newsletter() {
   const [state, formAction] = useFormState(subscribeNewsletter, {});
+  const { t } = useGender();
 
   return (
     <section className="max-w-4xl mx-auto px-5 py-12">
@@ -15,10 +17,10 @@ export default function Newsletter() {
           <Mail className="w-7 h-7" />
         </div>
         <h2 className="text-2xl font-black text-warm-mocha mb-2">
-          انضمي لنشرتنا البريدية
+          {t("انضمي لنشرتنا البريدية", "انضم لنشرتنا البريدية")}
         </h2>
         <p className="text-warm-mocha/70 font-bold mb-6">
-          كوني أول من يعرف عن المنتجات الجديدة والعروض الخاصة 💌
+          {t("كوني أول من يعرف عن المنتجات الجديدة والعروض الخاصة 💌", "كن أول من يعرف عن المنتجات الجديدة والعروض الخاصة 💌")}
         </p>
 
         {state?.success ? (

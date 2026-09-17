@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import {
   isValidEgyptPhone,
   isValidEmail,
@@ -58,15 +59,17 @@ export async function submitCustomOrder(prevState, formData) {
   const agreed = formData.get("agreed_to_terms") === "on";
 
   // ---- validate ----
-  if (fullName.length < 2) return { error: "من فضلك أدخلي اسمك بالكامل." };
+  const gender = await getUserGender();
+  if (fullName.length < 2)
+    return { error: gx(gender, "من فضلك أدخلي اسمك بالكامل.", "من فضلك أدخل اسمك بالكامل.") };
   if (!isValidEgyptPhone(phoneRaw))
     return { error: "رقم الهاتف غير صحيح. مثال: 01012345678" };
   if (email && !isValidEmail(email))
     return { error: "البريد الإلكتروني غير صالح." };
   if (!VALID_TYPES.includes(orderType))
-    return { error: "من فضلك اختاري نوع الطلب." };
+    return { error: gx(gender, "من فضلك اختاري نوع الطلب.", "من فضلك اختار نوع الطلب.") };
   if (description.length < 10)
-    return { error: "اكتبي وصفًا أوضح لطلبك (10 أحرف على الأقل)." };
+    return { error: gx(gender, "اكتبي وصفًا أوضح لطلبك (10 أحرف على الأقل).", "اكتب وصفًا أوضح لطلبك (10 أحرف على الأقل).") };
   if (size && !VALID_SIZES.includes(size))
     return { error: "المقاس المختار غير صالح." };
   if (budget && !VALID_BUDGETS.includes(budget))
@@ -130,7 +133,7 @@ export async function submitCustomOrder(prevState, formData) {
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) {
         console.error("[custom-order] image upload failed:", upErr?.message);
-        return { error: "تعذّر رفع الصور، حاولي مرة أخرى." };
+        return { error: gx(gender, "تعذّر رفع الصور، حاولي مرة أخرى.", "تعذّر رفع الصور، حاول مرة أخرى.") };
       }
       const { data: pub } = supabase.storage
         .from(STORAGE_BUCKETS.CUSTOM_REFS)
@@ -165,7 +168,7 @@ export async function submitCustomOrder(prevState, formData) {
 
     if (error) {
       console.error("[custom-order] insert failed:", error?.message);
-      return { error: "تعذّر حفظ الطلب، حاولي مرة أخرى." };
+      return { error: gx(gender, "تعذّر حفظ الطلب، حاولي مرة أخرى.", "تعذّر حفظ الطلب، حاول مرة أخرى.") };
     }
 
     return {
@@ -176,7 +179,7 @@ export async function submitCustomOrder(prevState, formData) {
     };
   } catch (err) {
     console.error("[custom-order] unexpected:", err?.message || err);
-    return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
+    return { error: gx(gender, "حدث خطأ غير متوقع، حاولي مرة أخرى.", "حدث خطأ غير متوقع، حاول مرة أخرى.") };
   }
 }
 

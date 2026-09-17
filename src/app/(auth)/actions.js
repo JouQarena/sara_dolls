@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import {
   isValidEgyptPhone,
   isValidEmail,
@@ -29,13 +31,15 @@ function getSiteOrigin() {
 export async function loginAction(prevState, formData) {
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
+  const gender = await getUserGender();
 
   if (!isValidEmail(email)) return { error: "البريد الإلكتروني غير صالح." };
-  if (!password) return { error: "من فضلك أدخلي كلمة المرور." };
+  if (!password)
+    return { error: gx(gender, "من فضلك أدخلي كلمة المرور.", "من فضلك أدخل كلمة المرور.") };
 
   const supabase = createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: translateAuthError(error.message) };
+  if (error) return { error: translateAuthError(error.message, gender) };
 
   let redirectTo = String(formData.get("redirect") || "/");
   // Only allow internal relative paths.
@@ -53,8 +57,11 @@ export async function signupAction(prevState, formData) {
   const password = String(formData.get("password") || "");
   const confirm = String(formData.get("confirm_password") || "");
   const agreed = formData.get("agreed_to_terms") === "on";
+  // Gender choice (ذكر / أنثى) — defaults to female (brand default).
+  const gender = formData.get("gender") === "male" ? "male" : "female";
 
-  if (fullName.length < 2) return { error: "من فضلك أدخلي اسمك بالكامل." };
+  if (fullName.length < 2)
+    return { error: gx(gender, "من فضلك أدخلي اسمك بالكامل.", "من فضلك أدخل اسمك بالكامل.") };
   if (!isValidEmail(email)) return { error: "البريد الإلكتروني غير صالح." };
   if (!isValidEgyptPhone(phoneRaw))
     return { error: "رقم الهاتف غير صحيح. مثال: 01012345678" };
@@ -72,11 +79,11 @@ export async function signupAction(prevState, formData) {
     password,
     options: {
       emailRedirectTo: `${getSiteOrigin()}/auth/callback`,
-      data: { full_name: fullName, phone_number: phone },
+      data: { full_name: fullName, phone_number: phone, gender },
     },
   });
 
-  if (error) return { error: translateAuthError(error.message) };
+  if (error) return { error: translateAuthError(error.message, gender) };
 
   // If email confirmation is still enabled in Supabase, no session is returned.
   // (Store owner: turn OFF "Confirm email" in Supabase → Authentication → Providers → Email
@@ -84,8 +91,11 @@ export async function signupAction(prevState, formData) {
   const needsConfirmation = !data.session;
   if (needsConfirmation) {
     return {
-      success:
+      success: gx(
+        gender,
         "تم إنشاء حسابك! تحققي من بريدك الإلكتروني لتأكيد الحساب ثم سجّلي الدخول. ولو مش حابة تستني، يمكنك الطلب مباشرة بدون حساب من المتجر 🌸",
+        "تم إنشاء حسابك! تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول. ولو مش حابب تستنى، يمكنك الطلب مباشرة بدون حساب من المتجر 🌸"
+      ),
     };
   }
 
@@ -105,12 +115,13 @@ export async function logoutAction() {
 export async function forgotPasswordAction(prevState, formData) {
   const email = String(formData.get("email") || "").trim();
   if (!isValidEmail(email)) return { error: "البريد الإلكتروني غير صالح." };
+  const gender = await getUserGender();
 
   const supabase = createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${getSiteOrigin()}/auth/callback?next=/reset-password`,
   });
-  if (error) return { error: translateAuthError(error.message) };
+  if (error) return { error: translateAuthError(error.message, gender) };
 
   return {
     success:
@@ -127,10 +138,34 @@ export async function resetPasswordAction(prevState, formData) {
   if (pwIssues.length) return { error: pwIssues[0] };
   if (password !== confirm) return { error: "كلمتا المرور غير متطابقتين." };
 
+  const gender = await getUserGender();
   const supabase = createClient();
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return { error: translateAuthError(error.message) };
+  if (error) return { error: translateAuthError(error.message, gender) };
 
   revalidatePath("/", "layout");
   redirect("/login?reset=1");
+}
+
+// ---- UPDATE GENDER (from the 👩/👨 toggle or profile) ----
+export async function updateGenderAction(gender) {
+  const g = gender === "male" ? "male" : "female";
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { ok: false };
+
+    await supabase.from("profiles").update({ gender: g }).eq("id", user.id);
+    // Keep auth metadata in sync too (best effort).
+    try {
+      await supabase.auth.updateUser({ data: { gender: g } });
+    } catch {}
+
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
 }

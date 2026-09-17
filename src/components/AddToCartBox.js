@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Minus, Plus, ShoppingBag, Heart, Check, FileText } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 import { useToast } from "@/components/ToastProvider";
+import { useGender } from "@/components/GenderProvider";
 
 export default function AddToCartBox({ product }) {
   const { addToCart, toggleWishlist, inWishlist } = useCart();
   const { toast } = useToast();
+  const { t } = useGender();
 
   const isPattern = product.product_type === "pattern_pdf";
   const outOfStock = !isPattern && product.stock <= 0;
@@ -82,11 +84,11 @@ export default function AddToCartBox({ product }) {
             </>
           ) : isPattern ? (
             <>
-              <FileText className="w-5 h-5" /> أضيفي الباترون للسلة
+              <FileText className="w-5 h-5" /> {t("أضيفي الباترون للسلة", "أضف الباترون للسلة")}
             </>
           ) : (
             <>
-              <ShoppingBag className="w-5 h-5" /> أضيفي للسلة
+              <ShoppingBag className="w-5 h-5" /> {t("أضيفي للسلة", "أضف للسلة")}
             </>
           )}
         </button>

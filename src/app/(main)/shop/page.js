@@ -5,6 +5,8 @@ import ShopControls from "@/components/ShopControls";
 import ProductCard from "@/components/ProductCard";
 import Pagination from "@/components/Pagination";
 import { PageHeader } from "@/components/legal";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +16,7 @@ export const metadata = {
 };
 
 export default async function ShopPage({ searchParams }) {
+  const gender = await getUserGender();
   const category = searchParams?.category || null;
   const search = searchParams?.search || "";
   const sort = searchParams?.sort || "featured";
@@ -31,7 +34,7 @@ export default async function ShopPage({ searchParams }) {
       <PageHeader
         emoji="🛍️"
         title="متجر سارة دولز"
-        subtitle="كل قطعة مصنوعة يدويًا بحب — اختاري ما يناسبك."
+        subtitle={gx(gender, "كل قطعة مصنوعة يدويًا بحب — اختاري ما يناسبك.", "كل قطعة مصنوعة يدويًا بحب — اختار ما يناسبك.")}
       />
 
       <div className="max-w-6xl mx-auto px-5 py-8">
@@ -50,7 +53,7 @@ export default async function ShopPage({ searchParams }) {
               لا توجد منتجات
             </p>
             <p className="text-warm-mocha/60 font-bold">
-              جرّبي تغيير الفلتر أو البحث بكلمة أخرى.
+              {gx(gender, "جرّبي تغيير الفلتر أو البحث بكلمة أخرى.", "جرّب تغيير الفلتر أو البحث بكلمة أخرى.")}
             </p>
           </div>
         ) : (

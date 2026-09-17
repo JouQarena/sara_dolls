@@ -11,25 +11,14 @@ import {
   PackageCheck,
 } from "lucide-react";
 import { getCategories, getFeaturedProducts } from "@/lib/products";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import CategoryCard from "@/components/CategoryCard";
 import ProductCard from "@/components/ProductCard";
 import StarRating from "@/components/StarRating";
 import Newsletter from "@/components/Newsletter";
 
 export const dynamic = "force-dynamic";
-
-const FEATURES = [
-  { icon: Heart, title: "كروشيه يدوي 100%", desc: "منسوجة بشغف وإتقان في كل غرزة." },
-  { icon: ShieldCheck, title: "خامات آمنة", desc: "خيوط قطنية ناعمة ولطيفة." },
-  { icon: Sparkles, title: "تصميم حسب الطلب", desc: "اطلبي قطعتك المخصّصة بإيدينا." },
-  { icon: Truck, title: "توصيل لكل مصر", desc: "شحن لكل المحافظات الـ 27." },
-];
-
-const HOW_IT_WORKS = [
-  { icon: MessageCircle, title: "احكيلنا فكرتك", desc: "املئي نموذج الطلب الخاص بوصف فكرتك وصور مرجعية." },
-  { icon: Palette, title: "نصمّم ونصنع", desc: "نرسل لك عرض سعر، وبعد موافقتك نبدأ التنفيذ بحب." },
-  { icon: PackageCheck, title: "يصلك طلبك", desc: "نغلّف قطعتك بعناية ونوصّلها إلى باب بيتك." },
-];
 
 const TESTIMONIALS = [
   { name: "منى", text: "الدمية تحفة فنية! الخامة ناعمة جدًا والتفاصيل دقيقة 😍", rating: 5 },
@@ -38,10 +27,25 @@ const TESTIMONIALS = [
 ];
 
 export default async function HomePage() {
+  const gender = await getUserGender();
   const [categories, featured] = await Promise.all([
     getCategories(),
     getFeaturedProducts(8),
   ]);
+
+  // Built per-request so speech matches the visitor's gender.
+  const FEATURES = [
+    { icon: Heart, title: "كروشيه يدوي 100%", desc: "منسوجة بشغف وإتقان في كل غرزة." },
+    { icon: ShieldCheck, title: "خامات آمنة", desc: "خيوط قطنية ناعمة ولطيفة." },
+    { icon: Sparkles, title: "تصميم حسب الطلب", desc: gx(gender, "اطلبي قطعتك المخصّصة بإيدينا.", "اطلب قطعتك المخصّصة بإيدينا.") },
+    { icon: Truck, title: "توصيل لكل مصر", desc: "شحن لكل المحافظات الـ 27." },
+  ];
+
+  const HOW_IT_WORKS = [
+    { icon: MessageCircle, title: "احكيلنا فكرتك", desc: gx(gender, "املئي نموذج الطلب الخاص بوصف فكرتك وصور مرجعية.", "املأ نموذج الطلب الخاص بوصف فكرتك وصور مرجعية.") },
+    { icon: Palette, title: "نصمّم ونصنع", desc: "نرسل لك عرض سعر، وبعد موافقتك نبدأ التنفيذ بحب." },
+    { icon: PackageCheck, title: "يصلك طلبك", desc: "نغلّف قطعتك بعناية ونوصّلها إلى باب بيتك." },
+  ];
 
   return (
     <main>
@@ -57,14 +61,14 @@ export default async function HomePage() {
             </h1>
             <p className="text-warm-mocha/70 font-bold text-lg leading-relaxed mb-7 max-w-lg mx-auto md:mx-0">
               كل قطعة من سارة دولز منسوجة يدويًا من أجود الخيوط، لتكون رفيقة العمر
-              وهدية لا تُنسى لمن تحبّين.
+              وهدية لا تُنسى {gx(gender, "لمن تحبّين.", "لمن تحب.")}
             </p>
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <Link
                 href="/shop"
                 className="inline-flex items-center gap-2 bg-soft-rose text-white font-black px-7 py-3.5 rounded-2xl hover:bg-brand-dark shadow-soft transition"
               >
-                تسوّقي المجموعة <ArrowLeft className="w-5 h-5" />
+                {gx(gender, "تسوّقي المجموعة", "تسوّق المجموعة")} <ArrowLeft className="w-5 h-5" />
               </Link>
               <Link
                 href="/طلب-خاص"
@@ -113,10 +117,10 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-5 py-14">
         <div className="text-center mb-9">
           <h2 className="text-2xl md:text-3xl font-black text-warm-mocha mb-2">
-            تسوّقي حسب التصنيف
+            {gx(gender, "تسوّقي حسب التصنيف", "تسوّق حسب التصنيف")}
           </h2>
           <p className="text-warm-mocha/60 font-bold">
-            اختاري ما يناسبك من مجموعاتنا المصنوعة بحب
+            {gx(gender, "اختاري ما يناسبك من مجموعاتنا المصنوعة بحب", "اختار ما يناسبك من مجموعاتنا المصنوعة بحب")}
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -136,7 +140,7 @@ export default async function HomePage() {
                   منتجات مميّزة 🌟
                 </h2>
                 <p className="text-warm-mocha/60 font-bold">
-                  أكثر القطع المحبوبة لدى عميلاتنا
+                  {gx(gender, "أكثر القطع المحبوبة لدى عميلاتنا", "أكثر القطع المحبوبة لدى عملائنا")}
                 </p>
               </div>
               <Link
@@ -173,7 +177,7 @@ export default async function HomePage() {
               href="/طلب-خاص"
               className="inline-flex items-center gap-2 bg-white text-soft-rose font-black px-8 py-4 rounded-2xl hover:bg-cream transition text-lg"
             >
-              ابدئي طلبك الخاص <ArrowLeft className="w-5 h-5" />
+              {gx(gender, "ابدئي طلبك الخاص", "ابدأ طلبك الخاص")} <ArrowLeft className="w-5 h-5" />
             </Link>
           </div>
         </div>
@@ -187,7 +191,7 @@ export default async function HomePage() {
               كيف يعمل الطلب الخاص؟
             </h2>
             <p className="text-warm-mocha/60 font-bold">
-              ثلاث خطوات بسيطة لتحصلي على قطعتك المخصّصة
+              {gx(gender, "ثلاث خطوات بسيطة لتحصلي على قطعتك المخصّصة", "ثلاث خطوات بسيطة لتحصل على قطعتك المخصّصة")}
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -213,7 +217,7 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-5 py-14">
         <div className="text-center mb-9">
           <h2 className="text-2xl md:text-3xl font-black text-warm-mocha mb-2">
-            ماذا قالت عميلاتنا 💕
+            {gx(gender, "ماذا قالت عميلاتنا 💕", "ماذا قال عملاؤنا 💕")}
           </h2>
         </div>
         <div className="grid md:grid-cols-3 gap-5">

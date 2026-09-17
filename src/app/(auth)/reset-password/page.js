@@ -4,9 +4,11 @@ import { useFormState } from "react-dom";
 import { resetPasswordAction } from "../actions";
 import { PasswordField, Alert } from "@/components/forms";
 import SubmitButton from "@/components/SubmitButton";
+import { useGender } from "@/components/GenderProvider";
 
 export default function ResetPasswordPage() {
   const [state, formAction] = useFormState(resetPasswordAction, {});
+  const { t } = useGender();
 
   return (
     <>
@@ -14,7 +16,7 @@ export default function ResetPasswordPage() {
         كلمة مرور جديدة
       </h2>
       <p className="text-warm-mocha/60 font-semibold text-sm mb-6">
-        اختاري كلمة مرور جديدة لحسابك.
+        {t("اختاري كلمة مرور جديدة لحسابك.", "اختار كلمة مرور جديدة لحسابك.")}
       </p>
 
       <form action={formAction} className="space-y-4">

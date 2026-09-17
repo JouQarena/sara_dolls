@@ -1,5 +1,7 @@
 import { MessageCircle, Instagram, Facebook, Clock, MapPin, Phone } from "lucide-react";
 import { SARA_PHONE_LOCAL } from "@/lib/whatsapp";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 import { PageHeader } from "@/components/legal";
 import { whatsappLink } from "@/lib/whatsapp";
 import ContactForm from "./ContactForm";
@@ -10,14 +12,15 @@ export const metadata = {
     "تواصلي مع فريق سارة دولز عبر واتساب أو نموذج الاتصال. سعداء بمساعدتك دائمًا.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const gender = await getUserGender();
   const wa = whatsappLink("مرحبًا سارة دولز 🌸، عندي استفسار...");
 
   return (
     <main>
       <PageHeader
         emoji="💬"
-        title="تواصلي معنا"
+        title={gx(gender, "تواصلي معنا", "تواصل معنا")}
         subtitle="عندك سؤال أو استفسار؟ فريق سارة دولز سعيد بمساعدتك في أي وقت."
       />
 
@@ -62,7 +65,7 @@ export default function ContactPage() {
           </div>
 
           <div className="bg-white rounded-3xl p-6 border border-pastel-pink/40 shadow-soft-sm">
-            <p className="font-black text-warm-mocha mb-3">تابعينا</p>
+            <p className="font-black text-warm-mocha mb-3">{gx(gender, "تابعينا", "تابعنا")}</p>
             <div className="flex gap-3">
               <Social href="https://instagram.com" icon={Instagram} label="إنستجرام" />
               <Social href="https://facebook.com" icon={Facebook} label="فيسبوك" />
@@ -74,10 +77,10 @@ export default function ContactPage() {
         {/* Contact form */}
         <div className="bg-white rounded-4xl p-6 md:p-8 border border-pastel-pink/40 shadow-soft">
           <h2 className="text-xl font-black text-warm-mocha mb-1">
-            أرسلي لنا رسالة
+            {gx(gender, "أرسلي لنا رسالة", "أرسل لنا رسالة")}
           </h2>
           <p className="text-warm-mocha/60 font-semibold text-sm mb-6">
-            املئي النموذج وسنرد عليك في أقرب وقت.
+            {gx(gender, "املئي النموذج وسنرد عليك في أقرب وقت.", "املأ النموذج وسنرد عليك في أقرب وقت.")}
           </p>
           <ContactForm />
         </div>

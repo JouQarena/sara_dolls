@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MessageCircle, CheckCircle2, Copy, Check } from "lucide-react";
+import { useGender } from "@/components/GenderProvider";
 
 export default function ConfirmationClient({ id, orderNumber }) {
   const [data, setData] = useState(null);
   const [copied, setCopied] = useState(false);
+  const { t } = useGender();
 
   useEffect(() => {
     try {
@@ -58,7 +60,7 @@ export default function ConfirmationClient({ id, orderNumber }) {
           </button>
         </div>
         <p className="text-xs font-bold text-warm-mocha/40 mt-2">
-          احتفظي بهذا الرقم لمتابعة طلبك من صفحة «طلباتي».
+          {t("احتفظي بهذا الرقم لمتابعة طلبك من صفحة «طلباتي».", "احتفظ بهذا الرقم لمتابعة طلبك من صفحة «طلباتي».")}
         </p>
       </div>
 
@@ -76,7 +78,7 @@ export default function ConfirmationClient({ id, orderNumber }) {
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 bg-[#25D366] text-white font-black py-4 rounded-2xl hover:brightness-95 transition shadow-soft mb-3"
         >
-          <MessageCircle className="w-5 h-5" /> أرسلي تفاصيل طلبك عبر واتساب
+          <MessageCircle className="w-5 h-5" /> {t("أرسلي تفاصيل طلبك عبر واتساب", "أرسل تفاصيل طلبك عبر واتساب")}
         </a>
       )}
 

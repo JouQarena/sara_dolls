@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isValidEmail } from "@/lib/validation";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 export async function subscribeNewsletter(prevState, formData) {
   const email = String(formData.get("email") || "").trim();
@@ -21,12 +23,14 @@ export async function subscribeNewsletter(prevState, formData) {
       .from("newsletter_subscribers")
       .insert({ email });
     if (error) {
+      const gender = await getUserGender();
       if (error.code === "23505")
-        return { success: "أنتِ مشتركة بالفعل معنا 🌸" };
-      return { error: "تعذّر الاشتراك، حاولي مرة أخرى." };
+        return { success: gx(gender, "أنتِ مشتركة بالفعل معنا 🌸", "أنت مشترك بالفعل معنا 🌸") };
+      return { error: gx(gender, "تعذّر الاشتراك، حاولي مرة أخرى.", "تعذّر الاشتراك، حاول مرة أخرى.") };
     }
     return { success: "تم اشتراكك بنجاح! شكراً لانضمامك 🌸" };
   } catch {
-    return { error: "حدث خطأ غير متوقع، حاولي مرة أخرى." };
+    const gender = await getUserGender();
+    return { error: gx(gender, "حدث خطأ غير متوقع، حاولي مرة أخرى.", "حدث خطأ غير متوقع، حاول مرة أخرى.") };
   }
 }

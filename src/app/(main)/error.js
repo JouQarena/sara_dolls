@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { RefreshCw, Home } from "lucide-react";
+import { useGender } from "@/components/GenderProvider";
 
 export default function Error({ reset }) {
+  const { t } = useGender();
   return (
     <main className="min-h-[60vh] flex items-center justify-center px-5 py-16">
       <div className="text-center max-w-md">
@@ -12,7 +14,7 @@ export default function Error({ reset }) {
           حدث خطأ ما
         </h1>
         <p className="text-warm-mocha/60 font-bold leading-relaxed mb-7">
-          نعتذر عن الإزعاج، حدث خطأ غير متوقع. حاولي إعادة تحميل الصفحة.
+          {t("نعتذر عن الإزعاج، حدث خطأ غير متوقع. حاولي إعادة تحميل الصفحة.", "نعتذر عن الإزعاج، حدث خطأ غير متوقع. حاول إعادة تحميل الصفحة.")}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <button

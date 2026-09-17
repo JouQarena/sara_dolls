@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Facebook, MessageCircle } from "lucide-react";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 // Policy links are fully built in Phase 3; links are in place now.
 const SHOP_LINKS = [
@@ -25,7 +27,8 @@ const POLICY_LINKS = [
   { href: "/سياسة-الطلبات-الخاصة", label: "سياسة الطلبات الخاصة" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  const gender = await getUserGender();
   return (
     <footer className="bg-warm-mocha text-cream mt-16">
       <div className="max-w-7xl mx-auto px-5 py-12">
@@ -62,7 +65,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <FooterCol title="تسوّقي" links={SHOP_LINKS} />
+          <FooterCol title={gx(gender, "تسوّقي", "تسوّق")} links={SHOP_LINKS} />
           <FooterCol title="معلومات" links={INFO_LINKS} />
           <FooterCol title="السياسات" links={POLICY_LINKS} />
         </div>

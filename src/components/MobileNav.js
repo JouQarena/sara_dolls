@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X, User, Package, Heart, Shield, LogOut } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
+import GenderToggle from "@/components/GenderToggle";
 
 export default function MobileNav({ links, isLoggedIn, isAdmin }) {
   const [open, setOpen] = useState(false);
@@ -82,6 +83,11 @@ export default function MobileNav({ links, isLoggedIn, isAdmin }) {
             </Link>
           ))}
         </nav>
+
+        {/* 👩/👨 speech toggle */}
+        <div className="mt-2 mb-1 px-3">
+          <GenderToggle />
+        </div>
 
         <div
           style={{

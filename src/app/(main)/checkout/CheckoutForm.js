@@ -14,6 +14,7 @@ import {
 import { useCart } from "@/components/CartProvider";
 import { useSettings, computeShippingClient } from "@/components/useSettings";
 import { useToast } from "@/components/ToastProvider";
+import { useGender } from "@/components/GenderProvider";
 import { placeOrder } from "./actions";
 import { regularOrderWhatsappMessage, whatsappLink } from "@/lib/whatsapp";
 import { formatEGP, EGYPT_GOVERNORATES } from "@/lib/constants";
@@ -24,6 +25,7 @@ export default function CheckoutForm() {
   const { cart, ready, cartSubtotal, clearCart } = useCart();
   const settings = useSettings();
   const { toast } = useToast();
+  const { t } = useGender();
 
   const [discount, setDiscount] = useState(null);
   const [payment, setPayment] = useState("cash_on_delivery");
@@ -108,7 +110,7 @@ export default function CheckoutForm() {
         router.push(`/order-confirmation/${res.id}`);
       }
     } catch {
-      setError("حدث خطأ غير متوقع، حاولي مرة أخرى.");
+      setError(t("حدث خطأ غير متوقع، حاولي مرة أخرى.", "حدث خطأ غير متوقع، حاول مرة أخرى."));
       setSubmitting(false);
     }
   }
@@ -130,10 +132,9 @@ export default function CheckoutForm() {
 
         {/* Guest checkout notice */}
         <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha">
-          🌸 يمكنك إتمام الطلب <span className="font-black">بدون إنشاء حساب</span> — فقط املئي
-          بيانات التوصيل.{" "}
+          🌸 يمكنك إتمام الطلب <span className="font-black">بدون إنشاء حساب</span> — {t("فقط املئي بيانات التوصيل.", "فقط املأ بيانات التوصيل.")}{" "}
           <Link href="/login?redirect=/checkout" className="text-soft-rose underline underline-offset-2">
-            عندك حساب؟ سجّلي الدخول
+            {t("عندك حساب؟ سجّلي الدخول", "عندك حساب؟ سجّل الدخول")}
           </Link>{" "}
           لتتبّع طلباتك بسهولة.
         </div>
@@ -167,7 +168,7 @@ export default function CheckoutForm() {
                   className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow"
                 >
                   <option value="" disabled>
-                    اختاري المحافظة
+                    {t("اختاري المحافظة", "اختار المحافظة")}
                   </option>
                   {EGYPT_GOVERNORATES.map((g) => (
                     <option key={g.slug} value={g.ar}>
@@ -256,7 +257,7 @@ export default function CheckoutForm() {
                     className="flex items-center gap-2 cursor-pointer rounded-xl border border-dashed border-pastel-pink/70 px-4 py-3 text-soft-rose font-bold text-sm hover:bg-pastel-pink/15"
                   >
                     <Upload className="w-4 h-4" />
-                    {screenshotName || "اختاري صورة الإيصال"}
+                    {screenshotName || t("اختاري صورة الإيصال", "اختار صورة الإيصال")}
                   </label>
                 </label>
               </div>

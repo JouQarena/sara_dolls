@@ -7,9 +7,11 @@ import { Suspense } from "react";
 import { loginAction } from "../actions";
 import { Field, PasswordField, Alert } from "@/components/forms";
 import SubmitButton from "@/components/SubmitButton";
+import { useGender } from "@/components/GenderProvider";
 
 function LoginForm() {
   const [state, formAction] = useFormState(loginAction, {});
+  const { t } = useGender();
   const params = useSearchParams();
   const justReset = params.get("reset") === "1";
   const justRegistered = params.get("registered") === "1";
@@ -24,18 +26,18 @@ function LoginForm() {
       <div className="bg-pastel-pink/20 border border-pastel-pink/60 rounded-2xl px-4 py-3 text-sm font-bold text-warm-mocha mb-6">
         🌸 يمكنك الطلب بدون حساب —{" "}
         <Link href="/shop" className="text-soft-rose underline underline-offset-2">
-          تصفّحي المتجر واطلبي مباشرة
+          {t("تصفّحي المتجر واطلبي مباشرة", "تصفّح المتجر واطلب مباشرة")}
         </Link>
       </div>
 
       {justReset && (
         <div className="mb-4">
-          <Alert type="success">تم تحديث كلمة المرور. سجّلي الدخول الآن.</Alert>
+          <Alert type="success">{t("تم تحديث كلمة المرور. سجّلي الدخول الآن.", "تم تحديث كلمة المرور. سجّل الدخول الآن.")}</Alert>
         </div>
       )}
       {justRegistered && (
         <div className="mb-4">
-          <Alert type="success">تم إنشاء حسابك! سجّلي الدخول الآن.</Alert>
+          <Alert type="success">{t("تم إنشاء حسابك! سجّلي الدخول الآن.", "تم إنشاء حسابك! سجّل الدخول الآن.")}</Alert>
         </div>
       )}
 
@@ -66,7 +68,7 @@ function LoginForm() {
             href="/forgot-password"
             className="text-sm font-bold text-soft-rose hover:underline"
           >
-            نسيتِ كلمة المرور؟
+            {t("نسيتِ كلمة المرور؟", "نسيت كلمة المرور؟")}
           </Link>
         </div>
 
@@ -78,7 +80,7 @@ function LoginForm() {
       <p className="text-center text-sm font-bold text-warm-mocha/70 mt-6">
         ليس لديك حساب؟{" "}
         <Link href="/signup" className="text-soft-rose hover:underline">
-          أنشئي حساباً
+          {t("أنشئي حساباً", "أنشئ حساباً")}
         </Link>
       </p>
     </>

@@ -4,9 +4,11 @@ import { useFormState } from "react-dom";
 import { sendContactMessage } from "./actions";
 import { Field, Alert } from "@/components/forms";
 import SubmitButton from "@/components/SubmitButton";
+import { useGender } from "@/components/GenderProvider";
 
 export default function ContactForm() {
   const [state, formAction] = useFormState(sendContactMessage, {});
+  const { t } = useGender();
 
   if (state?.success) {
     return (
@@ -45,7 +47,7 @@ export default function ContactForm() {
           name="message"
           required
           rows={5}
-          placeholder="اكتبي رسالتك أو استفسارك هنا..."
+          placeholder={t("اكتبي رسالتك أو استفسارك هنا...", "اكتب رسالتك أو استفسارك هنا...")}
           className="w-full rounded-2xl border border-pastel-pink/60 bg-cream/60 px-4 py-3 text-warm-mocha font-semibold placeholder:text-warm-mocha/40 outline-none focus:border-soft-rose focus:ring-2 focus:ring-rose-glow transition resize-none"
         />
       </label>

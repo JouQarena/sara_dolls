@@ -1,7 +1,11 @@
+import { cookies } from "next/headers";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/components/CartProvider";
 import { ToastProvider } from "@/components/ToastProvider";
+import { GenderProvider } from "@/components/GenderProvider";
+import { getUserAndProfile } from "@/lib/auth";
+import { GENDER_COOKIE, normalizeGender } from "@/lib/genderedText";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -73,13 +77,28 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Resolve speech gender once for the whole tree (profile > cookie > female).
+  let initialGender = "female";
+  let isLoggedIn = false;
+  try {
+    const { user, profile } = await getUserAndProfile();
+    isLoggedIn = Boolean(user);
+    if (user) {
+      initialGender = profile?.gender === "male" ? "male" : "female";
+    } else {
+      initialGender = normalizeGender(cookies().get(GENDER_COOKIE)?.value);
+    }
+  } catch {}
+
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body className="font-sans bg-[#FFFDFB] text-warm-mocha antialiased">
-        <ToastProvider>
-          <CartProvider>{children}</CartProvider>
-        </ToastProvider>
+        <GenderProvider initialGender={initialGender} isLoggedIn={isLoggedIn}>
+          <ToastProvider>
+            <CartProvider>{children}</CartProvider>
+          </ToastProvider>
+        </GenderProvider>
       </body>
     </html>
   );

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getUserGender } from "@/lib/auth";
+import { gx } from "@/lib/genderedText";
 
 // Page header for legal / info pages.
 export function PageHeader({ emoji, title, subtitle, updated }) {
@@ -82,7 +84,8 @@ export function Callout({ emoji = "💡", children, tone = "rose" }) {
   );
 }
 
-export function ContactCTA() {
+export async function ContactCTA() {
+  const gender = await getUserGender();
   return (
     <div className="mt-10 rounded-3xl bg-warm-mocha text-cream p-7 text-center">
       <p className="font-black text-lg mb-1">عندك سؤال؟</p>
@@ -93,7 +96,7 @@ export function ContactCTA() {
         href="/تواصل-معنا"
         className="inline-block bg-soft-rose text-white font-black px-6 py-3 rounded-2xl hover:bg-brand-dark transition"
       >
-        تواصلي معنا
+        {gx(gender, "تواصلي معنا", "تواصل معنا")}
       </Link>
     </div>
   );

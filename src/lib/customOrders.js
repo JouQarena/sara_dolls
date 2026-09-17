@@ -8,9 +8,9 @@ export const ORDER_TYPES = [
 ];
 
 export const SIZES = [
-  { value: "small", label: "صغير" },
-  { value: "medium", label: "متوسط" },
-  { value: "large", label: "كبير" },
+  { value: "small", label: "صغير (10 سم)" },
+  { value: "medium", label: "وسط (20 سم)" },
+  { value: "large", label: "كبير (30 سم)" },
   { value: "custom", label: "مقاس مخصّص (اذكريه في الوصف)" },
 ];
 
@@ -35,6 +35,16 @@ export function orderTypeLabel(v) {
   return ORDER_TYPES.find((t) => t.value === v)?.label || v || "—";
 }
 export function sizeLabel(v) {
+  return SIZES.find((s) => s.value === v)?.label || v || "—";
+}
+
+// Gender-aware size label for customer-facing UI (the "custom" option
+// addresses the visitor: اذكريه / اذكره). Admin keeps sizeLabel().
+export function sizeLabelFor(gender, v) {
+  if (v === "custom")
+    return gender === "male"
+      ? "مقاس مخصّص (اذكره في الوصف)"
+      : "مقاس مخصّص (اذكريه في الوصف)";
   return SIZES.find((s) => s.value === v)?.label || v || "—";
 }
 export function budgetLabel(v) {
