@@ -99,8 +99,9 @@ create table if not exists public.products (
   image_url       text,
   images_gallery  text[] not null default '{}',
   product_type    text not null default 'physical'
-                    check (product_type in ('physical','pattern_pdf')),
+                    check (product_type in ('physical','pattern_pdf','made_to_order')),
   pdf_url         text,                                   -- patterns only
+  lead_time_days  int check (lead_time_days is null or lead_time_days >= 0), -- made-to-order prep days
   is_available    boolean not null default true,
   is_featured     boolean not null default false,
   average_rating  numeric(2,1) not null default 0,
@@ -295,6 +296,22 @@ create table if not exists public.site_settings (
 );
 
 -- ============================================================================
+-- 13) NOTIFICATIONS  (admin 🔔 bell — new orders)
+-- ============================================================================
+create table if not exists public.notifications (
+  id          uuid primary key default gen_random_uuid(),
+  type        text not null check (type in ('new_order','new_custom_order')),
+  title_ar    text not null,
+  body_ar     text,
+  link        text not null default '/admin',
+  ref_id      uuid,
+  ref_number  bigint,
+  is_read     boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+create index if not exists notifications_read_idx on public.notifications(is_read, created_at desc);
+
+-- ============================================================================
 -- RPC: atomically increment a discount code's used_count (called at checkout)
 -- ============================================================================
 create or replace function public.increment_discount_use(p_code text)
@@ -323,6 +340,7 @@ alter table public.custom_orders          enable row level security;
 alter table public.newsletter_subscribers enable row level security;
 alter table public.contact_messages       enable row level security;
 alter table public.site_settings          enable row level security;
+alter table public.notifications          enable row level security;
 
 -- ---- PROFILES ----
 drop policy if exists "profiles_select_own" on public.profiles;
@@ -450,6 +468,11 @@ create policy "settings_read_all" on public.site_settings
   for select using (true);
 drop policy if exists "settings_admin_write" on public.site_settings;
 create policy "settings_admin_write" on public.site_settings
+  for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---- NOTIFICATIONS (admin only) ----
+drop policy if exists "notifications_admin_all" on public.notifications;
+create policy "notifications_admin_all" on public.notifications
   for all using (public.is_admin()) with check (public.is_admin());
 
 -- ============================================================================

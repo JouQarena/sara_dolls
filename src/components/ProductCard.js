@@ -25,7 +25,8 @@ export default function ProductCard({ product }) {
   );
 
   const isPattern = product_type === "pattern_pdf";
-  const outOfStock = !isPattern && stock <= 0;
+  const isMadeToOrder = product_type === "made_to_order";
+  const outOfStock = !isPattern && !isMadeToOrder && stock <= 0;
   const hasDiscount = original_price && original_price > price;
   const discountPct = hasDiscount
     ? Math.round((1 - price / original_price) * 100)
@@ -63,6 +64,11 @@ export default function ProductCard({ product }) {
           {is_featured && (
             <span className="bg-soft-rose text-white text-[0.65rem] font-black px-2.5 py-1 rounded-full shadow-sm">
               مميّز 🌟
+            </span>
+          )}
+          {isMadeToOrder && (
+            <span className="bg-purple-500 text-white text-[0.65rem] font-black px-2.5 py-1 rounded-full shadow-sm">
+              🧶 عند الطلب
             </span>
           )}
           {hasDiscount && (

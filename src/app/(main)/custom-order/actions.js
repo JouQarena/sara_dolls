@@ -10,6 +10,7 @@ import {
 } from "@/lib/validation";
 import { ORDER_TYPES, SIZES, BUDGET_RANGES } from "@/lib/customOrders";
 import { STORAGE_BUCKETS } from "@/lib/constants";
+import { notifyNewCustomOrder } from "@/lib/notifyAdmin";
 
 const VALID_TYPES = ORDER_TYPES.map((t) => t.value);
 const VALID_SIZES = SIZES.map((s) => s.value);
@@ -170,6 +171,17 @@ export async function submitCustomOrder(prevState, formData) {
       console.error("[custom-order] insert failed:", error?.message);
       return { error: gx(gender, "تعذّر حفظ الطلب، حاولي مرة أخرى.", "تعذّر حفظ الطلب، حاول مرة أخرى.") };
     }
+
+    // 🔔 Notify Sara: admin bell + email (fail-safe, never blocks submit).
+    await notifyNewCustomOrder({
+      id: data.id,
+      orderNumber: data.order_number,
+      fullName,
+      phone,
+      orderType,
+      description,
+      imagesCount: imageUrls.length,
+    });
 
     return {
       success: true,

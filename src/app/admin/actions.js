@@ -63,7 +63,16 @@ export async function saveProduct(formData) {
     : null;
   const stock = Number(formData.get("stock") || 0);
   const category_id = String(formData.get("category_id") || "") || null;
-  const product_type = String(formData.get("product_type") || "physical");
+  const product_type = ["physical", "pattern_pdf", "made_to_order"].includes(
+    String(formData.get("product_type") || "physical")
+  )
+    ? String(formData.get("product_type"))
+    : "physical";
+  const leadTimeRaw = String(formData.get("lead_time_days") || "").trim();
+  const lead_time_days =
+    product_type === "made_to_order" && leadTimeRaw !== ""
+      ? Math.max(0, Number(leadTimeRaw) || 0)
+      : null;
   const is_featured = formData.get("is_featured") === "on";
   const is_available = formData.get("is_available") === "on";
 
@@ -98,7 +107,8 @@ export async function saveProduct(formData) {
 
   const payload = {
     name, name_ar, description_ar, price, original_price, stock,
-    category_id, product_type, pdf_url, image_url, images_gallery,
+    category_id, product_type, pdf_url, lead_time_days,
+    image_url, images_gallery,
     is_featured, is_available,
   };
 

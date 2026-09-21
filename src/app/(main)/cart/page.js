@@ -101,6 +101,7 @@ export default function CartPage() {
         <div className="lg:col-span-2 space-y-3">
           {cart.map((item) => {
             const isPattern = item.product_type === "pattern_pdf";
+            const isMadeToOrder = item.product_type === "made_to_order";
             return (
               <div
                 key={item.id}
@@ -128,6 +129,11 @@ export default function CartPage() {
                   {isPattern && (
                     <span className="inline-flex items-center gap-1 text-[0.65rem] font-black text-warm-mocha/60 mt-1">
                       <FileText className="w-3 h-3" /> باترون رقمي
+                    </span>
+                  )}
+                  {isMadeToOrder && (
+                    <span className="inline-flex items-center gap-1 text-[0.65rem] font-black text-purple-600 mt-1">
+                      🧶 يُصنع عند الطلب
                     </span>
                   )}
                   <p className="text-soft-rose font-black mt-1">

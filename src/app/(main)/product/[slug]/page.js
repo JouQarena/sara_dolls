@@ -41,7 +41,8 @@ export default async function ProductDetailPage({ params }) {
   ]);
 
   const isPattern = product.product_type === "pattern_pdf";
-  const outOfStock = !isPattern && product.stock <= 0;
+  const isMadeToOrder = product.product_type === "made_to_order";
+  const outOfStock = !isPattern && !isMadeToOrder && product.stock <= 0;
   const hasDiscount = product.original_price && product.original_price > product.price;
   const discountPct = hasDiscount
     ? Math.round((1 - product.price / product.original_price) * 100)
@@ -152,7 +153,20 @@ export default async function ProductDetailPage({ params }) {
 
             {/* stock badge */}
             <div className="mb-5">
-              {isPattern ? (
+              {isMadeToOrder ? (
+                <span className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-700 text-sm font-black px-3 py-1.5 rounded-full">
+                  🧶 يُصنع عند الطلب
+                  {product.lead_time_days
+                    ? ` — التجهيز خلال ~${Number(product.lead_time_days).toLocaleString("ar-EG")} ${
+                        Number(product.lead_time_days) === 1
+                          ? "يوم"
+                          : Number(product.lead_time_days) === 2
+                          ? "يومين"
+                          : "أيام"
+                      }`
+                    : ""}
+                </span>
+              ) : isPattern ? (
                 <span className="inline-flex items-center gap-1.5 bg-warm-mocha/10 text-warm-mocha text-sm font-black px-3 py-1.5 rounded-full">
                   <FileText className="w-4 h-4" /> منتج رقمي — يصلك فور الشراء
                 </span>

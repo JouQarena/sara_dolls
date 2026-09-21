@@ -30,6 +30,9 @@ export default function ProductsManager({ products, categories }) {
               {p.product_type === "pattern_pdf" && (
                 <span className="absolute top-2 left-2"><Badge className="bg-warm-mocha text-cream"><FileText className="w-3 h-3 inline" /> باترون</Badge></span>
               )}
+              {p.product_type === "made_to_order" && (
+                <span className="absolute top-2 left-2"><Badge className="bg-purple-500 text-white">🧶 عند الطلب</Badge></span>
+              )}
               {!p.is_available && (
                 <span className="absolute top-2 right-2"><Badge className="bg-rose-100 text-rose-600">غير متاح</Badge></span>
               )}
@@ -38,7 +41,13 @@ export default function ProductsManager({ products, categories }) {
               <h3 className="font-black text-warm-mocha line-clamp-1">{p.name_ar}</h3>
               <div className="flex items-center justify-between mt-1">
                 <span className="font-black text-soft-rose">{formatEGP(p.price)}</span>
-                <span className="text-xs font-bold text-warm-mocha/50">مخزون: {(p.stock ?? 0).toLocaleString("ar-EG")}</span>
+                {p.product_type === "made_to_order" ? (
+                  <span className="text-xs font-black text-purple-600">
+                    🧶 عند الطلب{p.lead_time_days ? ` • ~${Number(p.lead_time_days).toLocaleString("ar-EG")} يوم` : ""}
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold text-warm-mocha/50">مخزون: {(p.stock ?? 0).toLocaleString("ar-EG")}</span>
+                )}
               </div>
               <div className="flex gap-2 mt-3">
                 <button onClick={() => setEditing(p)} className="flex-1 flex items-center justify-center gap-1 bg-cream text-warm-mocha font-black py-2 rounded-xl text-sm hover:bg-pastel-pink/30">
@@ -148,9 +157,19 @@ function ProductModal({ product, categories, onClose }) {
           </div>
 
           <Sel label="نوع المنتج" name="product_type" value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="physical">منتج فعلي</option>
+            <option value="physical">منتج فعلي (بمخزون)</option>
             <option value="pattern_pdf">باترون رقمي (PDF)</option>
+            <option value="made_to_order">🧶 يُصنع عند الطلب (بدون مخزون)</option>
           </Sel>
+
+          {type === "made_to_order" && (
+            <div>
+              <Inp label="مدة التجهيز (أيام) — تظهر للعميلة" name="lead_time_days" type="number" defaultValue={product.lead_time_days ?? ""} placeholder="مثال: 10" />
+              <p className="text-xs font-bold text-warm-mocha/50 mt-1">
+                المنتج ده بيتباع بكمية مفتوحة ومن غير «نفد المخزون» — خانة المخزون فوق بتتجاهل.
+              </p>
+            </div>
+          )}
 
           <div>
             <span className="block text-sm font-extrabold text-warm-mocha mb-1.5">

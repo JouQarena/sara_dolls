@@ -82,7 +82,8 @@ export default function WishlistPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {products.map((p) => {
           const isPattern = p.product_type === "pattern_pdf";
-          const outOfStock = !isPattern && p.stock <= 0;
+          const isMadeToOrder = p.product_type === "made_to_order";
+          const outOfStock = !isPattern && !isMadeToOrder && p.stock <= 0;
           return (
             <div
               key={p.id}
@@ -101,6 +102,11 @@ export default function WishlistPage() {
                 {isPattern && (
                   <span className="absolute top-2 left-2 flex items-center gap-1 bg-warm-mocha text-cream text-[0.6rem] font-black px-2 py-0.5 rounded-full">
                     <FileText className="w-3 h-3" /> باترون
+                  </span>
+                )}
+                {isMadeToOrder && (
+                  <span className="absolute top-2 left-2 bg-purple-500 text-white text-[0.6rem] font-black px-2 py-0.5 rounded-full">
+                    🧶 عند الطلب
                   </span>
                 )}
               </Link>

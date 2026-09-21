@@ -38,7 +38,7 @@ export async function getDashboardStats() {
     ] = await Promise.all([
       sb.from("orders").select("total_price, status, created_at"),
       sb.from("custom_orders").select("status"),
-      sb.from("products").select("id, stock, is_available"),
+      sb.from("products").select("id, stock, is_available, product_type"),
       sb.from("orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
       sb
         .from("custom_orders")
@@ -63,7 +63,9 @@ export async function getDashboardStats() {
       unreadMessages: messagesRes.count || 0,
       subscribers: subsRes.count || 0,
       totalProducts: products.length,
-      lowStock: products.filter((p) => !p.is_available || p.stock <= 3).length,
+      lowStock: products.filter(
+        (p) => p.product_type !== "made_to_order" && (!p.is_available || p.stock <= 3)
+      ).length,
       recentOrders: orders
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 5),

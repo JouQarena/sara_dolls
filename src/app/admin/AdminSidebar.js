@@ -19,11 +19,14 @@ import {
   X,
   Home,
   LogOut,
+  Bell,
 } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
+import NotificationBell from "@/components/admin/NotificationBell";
 
 const LINKS = [
   { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard, exact: true },
+  { href: "/admin/notifications", label: "التنبيهات 🔔", icon: Bell },
   { href: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
   { href: "/admin/custom-orders", label: "الطلبات الخاصة", icon: Sparkles, star: true },
   { href: "/admin/products", label: "المنتجات", icon: Package },
@@ -71,20 +74,26 @@ export default function AdminSidebar() {
           <Image src="/sara-avatar.jpg" alt="" width={32} height={32} className="rounded-full" />
           <span className="font-black text-warm-mocha">لوحة الإدارة</span>
         </div>
-        <button onClick={() => setOpen(true)} aria-label="القائمة" className="p-2">
-          <Menu className="w-6 h-6 text-warm-mocha" />
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <button onClick={() => setOpen(true)} aria-label="القائمة" className="p-2">
+            <Menu className="w-6 h-6 text-warm-mocha" />
+          </button>
+        </div>
       </div>
 
       {/* desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-64 shrink-0 bg-white border-l border-pastel-pink/40 p-4 sticky top-0 h-screen">
-        <Link href="/admin" className="flex items-center gap-2.5 mb-6 px-2">
-          <Image src="/sara-avatar.jpg" alt="" width={40} height={40} className="rounded-full border-2 border-soft-rose" />
-          <div>
-            <p className="font-black text-warm-mocha leading-tight">سارة دولز</p>
-            <p className="text-[0.65rem] font-bold text-warm-mocha/50">لوحة الإدارة</p>
-          </div>
-        </Link>
+        <div className="flex items-center justify-between mb-6 px-2">
+          <Link href="/admin" className="flex items-center gap-2.5">
+            <Image src="/sara-avatar.jpg" alt="" width={40} height={40} className="rounded-full border-2 border-soft-rose" />
+            <div>
+              <p className="font-black text-warm-mocha leading-tight">سارة دولز</p>
+              <p className="text-[0.65rem] font-bold text-warm-mocha/50">لوحة الإدارة</p>
+            </div>
+          </Link>
+          <NotificationBell />
+        </div>
         {nav}
         <div className="mt-auto pt-4 border-t border-pastel-pink/30 space-y-1">
           <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-warm-mocha/80 hover:bg-pastel-pink/30">

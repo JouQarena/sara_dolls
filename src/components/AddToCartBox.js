@@ -12,8 +12,9 @@ export default function AddToCartBox({ product }) {
   const { t } = useGender();
 
   const isPattern = product.product_type === "pattern_pdf";
-  const outOfStock = !isPattern && product.stock <= 0;
-  const maxQty = isPattern ? 99 : Math.max(1, product.stock);
+  const isMadeToOrder = product.product_type === "made_to_order";
+  const outOfStock = !isPattern && !isMadeToOrder && product.stock <= 0;
+  const maxQty = isPattern || isMadeToOrder ? 99 : Math.max(1, product.stock);
 
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -58,9 +59,24 @@ export default function AddToCartBox({ product }) {
               <Plus className="w-4 h-4" />
             </button>
           </div>
-          <span className="text-xs font-bold text-warm-mocha/40">
-            متبقّي {product.stock} قطعة
-          </span>
+          {isMadeToOrder ? (
+            <span className="text-xs font-black text-purple-600">
+              🧶 يُصنع عند الطلب
+              {product.lead_time_days
+                ? ` • التجهيز خلال ~${Number(product.lead_time_days).toLocaleString("ar-EG")} ${
+                    Number(product.lead_time_days) === 1
+                      ? "يوم"
+                      : Number(product.lead_time_days) === 2
+                      ? "يومين"
+                      : "أيام"
+                  }`
+                : ""}
+            </span>
+          ) : (
+            <span className="text-xs font-bold text-warm-mocha/40">
+              متبقّي {product.stock} قطعة
+            </span>
+          )}
         </div>
       )}
 

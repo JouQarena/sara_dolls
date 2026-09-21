@@ -9,6 +9,7 @@ import {
   normalizeEgyptPhone,
 } from "@/lib/validation";
 import { EGYPT_GOVERNORATES, STORAGE_BUCKETS } from "@/lib/constants";
+import { notifyNewOrder } from "@/lib/notifyAdmin";
 
 function isConfigured() {
   return Boolean(
@@ -177,7 +178,8 @@ export async function placeOrder(formData) {
       if (!p || !p.is_available)
         return { error: `أحد المنتجات لم يعد متاحًا.` };
       const isPattern = p.product_type === "pattern_pdf";
-      if (!isPattern && p.stock < item.quantity)
+      const isMadeToOrder = p.product_type === "made_to_order";
+      if (!isPattern && !isMadeToOrder && p.stock < item.quantity)
         return { error: `الكمية المطلوبة من «${p.name_ar}» غير متوفّرة.` };
       const lineTotal = Number(p.price) * item.quantity;
       subtotal += lineTotal;
@@ -187,6 +189,7 @@ export async function placeOrder(formData) {
         quantity: item.quantity,
         price_at_purchase: Number(p.price),
         isPattern,
+        isMadeToOrder,
         currentStock: p.stock,
       });
     }
@@ -271,9 +274,9 @@ export async function placeOrder(formData) {
       return { error: "تعذّر حفظ تفاصيل الطلب." };
     }
 
-    // Reduce stock (physical only) — via writer so it actually applies.
+    // Reduce stock (physical only — patterns & made-to-order have no stock).
     for (const li of lineItems) {
-      if (!li.isPattern) {
+      if (!li.isPattern && !li.isMadeToOrder) {
         const { error: stockErr } = await writer
           .from("products")
           .update({ stock: Math.max(0, li.currentStock - li.quantity) })
@@ -289,6 +292,22 @@ export async function placeOrder(formData) {
         () => {}
       );
     }
+
+    // 🔔 Notify Sara: admin bell + email (fail-safe, never blocks checkout).
+    await notifyNewOrder({
+      id: order.id,
+      orderNumber: order.order_number,
+      fullName,
+      phone,
+      governorate,
+      total,
+      paymentMethod,
+      items: lineItems.map((li) => ({
+        name: li.product_name_ar,
+        qty: li.quantity,
+        line: Number(li.price_at_purchase) * li.quantity,
+      })),
+    });
 
     return {
       success: true,
